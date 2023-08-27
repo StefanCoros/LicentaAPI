@@ -10,7 +10,6 @@ import {
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { CitiesService } from './cities.service';
-import { DeleteResult } from 'typeorm';
 
 @ApiTags('Cities Controller')
 @Controller('api/cities')

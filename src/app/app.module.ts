@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from 'src/config/config.service';
 import { CoreModule } from './@core/core.module';
 import { CitiesModule } from './modules/cities/cities.module';
+import { TechnologiesModule } from './modules/technologies/technologies.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { CitiesModule } from './modules/cities/cities.module';
     }),
     CoreModule,
     CitiesModule,
+    TechnologiesModule,
+    RolesModule,
   ],
 })
 export class AppModule {}

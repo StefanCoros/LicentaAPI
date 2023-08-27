@@ -12,7 +12,7 @@ export class City {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   @ApiProperty()
   name: string;
 

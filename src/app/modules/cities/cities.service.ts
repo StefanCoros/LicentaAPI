@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { City } from 'src/db/typeorm/entities/city.entity';
-import { DataSource, DeleteResult } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class CitiesService {
