@@ -12,7 +12,7 @@ export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, unique: true })
+  @Column({ unique: true })
   @ApiProperty()
   role: string;
 

@@ -12,15 +12,15 @@ export class City {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, unique: true })
+  @Column({ unique: true })
   @ApiProperty()
   name: string;
 
-  @Column('float', { nullable: false })
+  @Column('float')
   @ApiProperty()
   latitude: number;
 
-  @Column('float', { nullable: false })
+  @Column('float')
   @ApiProperty()
   longitude: number;
 

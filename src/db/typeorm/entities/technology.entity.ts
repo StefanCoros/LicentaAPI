@@ -3,16 +3,18 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Job } from './job.entity';
 
 @Entity({ name: 'technologies' })
 export class Technology {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, unique: true })
+  @Column({ unique: true })
   @ApiProperty()
   name: string;
 
@@ -21,4 +23,7 @@ export class Technology {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => Job)
+  job: Job;
 }
