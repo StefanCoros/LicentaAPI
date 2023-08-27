@@ -1,3 +1,6 @@
+const express = require("express");
+const router = express.Router();
+
 /**
  * @swagger
  * components:
@@ -42,12 +45,6 @@
  *   get:
  *     summary: Get users
  *     tags: [User]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
  *         description: The created user.
@@ -77,3 +74,8 @@
  *         description: Some server error
  *
  */
+router.get("/", function (req, res) {
+  res.send("Users home page");
+});
+
+module.exports = router;
