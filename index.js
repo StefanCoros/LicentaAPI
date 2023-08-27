@@ -5,7 +5,7 @@ const express = require("express");
   (swaggerUi = require("swagger-ui-express"));
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.get("/", (req, res) => {
   res.redirect("/api");
