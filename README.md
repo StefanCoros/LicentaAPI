@@ -71,3 +71,30 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
   Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Typeorm migrations
+
+To generate migrations from entities change run the following command:
+
+npm run migration:generate -- src/db/typeorm/migrations/<migration_name>
+
+To run last migrations run the following command:
+
+npm run migration:run
+
+To revert last migration run the following command:
+
+npm revert migration:run
+
+To create an empty migration file run the following command:
+
+npx typeorm-ts-node-esm migration:create src/db/typeorm/migrations/<migration_name>
+
+# "typeorm-seeding": "^1.6.1"
+
+was installed with the following command: npm i --save-dev typeorm-seeding --legacy-peer-deps
+
+# sql
+
+-- Truncates table with foreign check disabled
+SET FOREIGN_KEY_CHECKS = 0; TRUNCATE categories; SET FOREIGN_KEY_CHECKS = 1;
