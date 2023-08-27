@@ -2,13 +2,12 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as Joi from '@hapi/joi';
 import * as path from 'path';
-import IEnvConfigInterface from '../interfaces/env-config.interface';
 import { Injectable } from '@nestjs/common';
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 
 @Injectable()
 export class ConfigService {
-  private envConfig: IEnvConfigInterface;
+  private envConfig: any;
 
   constructor(filePath: string) {
     const config = fs.existsSync(filePath)
@@ -49,7 +48,7 @@ export class ConfigService {
 	  Ensures all needed variables are set, and returns the validated JavaScript object
 	  including the applied default values.
   */
-  private validateInput(envConfig: IEnvConfigInterface): IEnvConfigInterface {
+  private validateInput(envConfig: any): any {
     const envVarsSchema: Joi.ObjectSchema = Joi.object({
       NODE_ENV: Joi.string()
         .valid('development', 'production')
