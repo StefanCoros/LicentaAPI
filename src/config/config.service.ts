@@ -16,6 +16,14 @@ export class ConfigService {
     this.envConfig = this.validateInput(config);
   }
 
+  get(key) {
+    if (!this.envConfig[key]) {
+      throw new Error(`Config value for ${key} not found`);
+    }
+
+    return this.envConfig[key];
+  }
+
   getTypeORMConfig(): MysqlConnectionOptions {
     const baseDir = path.join(__dirname, '../');
     const entitiesPath = `${baseDir}${this.envConfig.TYPEORM_ENTITIES.split(

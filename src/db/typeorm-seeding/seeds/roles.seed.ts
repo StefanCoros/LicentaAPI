@@ -1,17 +1,17 @@
 import { Connection, EntityManager } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Role } from '../../typeorm/entities/role.entity';
-import { RoleEnum } from '../../../app/@core/models/role.enum';
+import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
 
 export class RolesSeed implements Seeder {
   async run(factory: Factory, connection: Connection): Promise<void> {
     await connection.transaction((entityManager: EntityManager) => {
       return entityManager.save([
         entityManager.create<Role>(Role, {
-          role: RoleEnum.Standard,
+          role: RolesEnum.Standard,
         }),
         entityManager.create<Role>(Role, {
-          role: RoleEnum.Premium,
+          role: RolesEnum.Premium,
         }),
       ]);
     });

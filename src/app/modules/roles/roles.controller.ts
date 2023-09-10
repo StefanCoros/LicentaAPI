@@ -6,12 +6,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/db/typeorm/entities/role.entity';
 import { RolesService } from './roles.service';
+import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 
 @ApiTags('Roles Controller')
+@UseGuards(JwtGuard)
 @Controller('api/roles')
 export class RolesController {
   constructor(private rolesService: RolesService) {}

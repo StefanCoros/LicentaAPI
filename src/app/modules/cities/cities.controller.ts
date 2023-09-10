@@ -6,12 +6,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { CitiesService } from './cities.service';
+import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 
 @ApiTags('Cities Controller')
+@UseGuards(JwtGuard)
 @Controller('api/cities')
 export class CitiesController {
   constructor(private citiesService: CitiesService) {}

@@ -6,12 +6,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { Job } from 'src/db/typeorm/entities/job.entity';
+import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 
 @ApiTags('Jobs Controller')
+@UseGuards(JwtGuard)
 @Controller('api/jobs')
 export class JobsController {
   constructor(private jobsService: JobsService) {}
