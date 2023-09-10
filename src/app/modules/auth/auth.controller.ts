@@ -2,7 +2,7 @@ import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../../@core/guards/auth.guard';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @ApiTags('Admin Controller | Auth Controller')
 @Controller('api/admin/auth')
