@@ -64,7 +64,6 @@ export class UsersController {
       .then((user: User) => this.removeSensitiveFields(user));
   }
 
-
   @Delete(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
