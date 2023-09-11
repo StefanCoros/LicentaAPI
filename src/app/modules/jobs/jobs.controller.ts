@@ -8,10 +8,13 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { Job } from 'src/db/typeorm/entities/job.entity';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
+import { GetJobResponseModel } from './models/get-job-response.model';
+import { PostJobRequestModel } from './models/post-job-request.model';
+import { PutJobRequestModel } from './models/put-job-request.model';
 
 @ApiTags('Jobs Controller')
 @UseGuards(JwtGuard)
@@ -21,35 +24,41 @@ export class JobsController {
 
   @Get()
   @ApiResponse({
-    type: [Job],
+    type: [GetJobResponseModel],
   })
-  getAll(): Promise<Job[]> {
+  getAll(): Promise<GetJobResponseModel[]> {
     return this.jobsService.getAll();
   }
 
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
-    type: Job,
+    type: GetJobResponseModel,
   })
-  getById(@Param('id') id): Promise<Job> {
+  getById(@Param('id') id): Promise<GetJobResponseModel> {
     return this.jobsService.getById(id);
   }
 
   @Post()
-  @ApiResponse({
-    type: Job,
+  @ApiBody({
+    type: PostJobRequestModel,
   })
-  create(@Body() payload: Job): Promise<Job> {
+  @ApiResponse({
+    type: GetJobResponseModel,
+  })
+  create(@Body() payload: PostJobRequestModel): Promise<GetJobResponseModel> {
     return this.jobsService.create(payload);
   }
 
   @Put(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
-    type: Job,
+    type: PutJobRequestModel,
   })
-  update(@Param('id') id, @Body() payload: Job): Promise<Job> {
+  update(
+    @Param('id') id,
+    @Body() payload: PutJobRequestModel,
+  ): Promise<GetJobResponseModel> {
     return this.jobsService.updateById(id, payload);
   }
 

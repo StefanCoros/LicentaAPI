@@ -8,11 +8,13 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Role } from 'src/db/typeorm/entities/role.entity';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { User } from 'src/db/typeorm/entities/user.entity';
+import { GetUserResponseModel } from './models/get-user-response.model';
+import { PostUserRequestModel } from './models/post-user-request.model';
+import { PutUserRequestModel } from './models/put-user-request.model';
 
 @ApiTags('Users Controller')
 @UseGuards(JwtGuard)
@@ -22,9 +24,9 @@ export class UsersController {
 
   @Get()
   @ApiResponse({
-    type: [User],
+    type: [GetUserResponseModel],
   })
-  getAll(): Promise<User[]> {
+  getAll(): Promise<GetUserResponseModel[]> {
     return this.usersService
       .getAll()
       .then((users: User[]) =>
@@ -35,19 +37,22 @@ export class UsersController {
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
-    type: User,
+    type: GetUserResponseModel,
   })
-  getById(@Param('id') id): Promise<User> {
+  getById(@Param('id') id): Promise<GetUserResponseModel> {
     return this.usersService
       .getById(id)
       .then((user: User) => this.removeSensitiveFields(user));
   }
 
   @Post()
-  @ApiResponse({
-    type: User,
+  @ApiBody({
+    type: PostUserRequestModel,
   })
-  create(@Body() payload: User): Promise<User> {
+  @ApiResponse({
+    type: GetUserResponseModel,
+  })
+  create(@Body() payload: PostUserRequestModel): Promise<GetUserResponseModel> {
     return this.usersService
       .create(payload)
       .then((user: User) => this.removeSensitiveFields(user));
@@ -55,10 +60,16 @@ export class UsersController {
 
   @Put(':id')
   @ApiParam({ name: 'id' })
-  @ApiResponse({
-    type: User,
+  @ApiBody({
+    type: PutUserRequestModel,
   })
-  update(@Param('id') id, @Body() payload: User): Promise<User> {
+  @ApiResponse({
+    type: GetUserResponseModel,
+  })
+  update(
+    @Param('id') id,
+    @Body() payload: PutUserRequestModel,
+  ): Promise<GetUserResponseModel> {
     return this.usersService
       .updateById(id, payload)
       .then((user: User) => this.removeSensitiveFields(user));
@@ -73,11 +84,11 @@ export class UsersController {
     return this.usersService.deleteById(id);
   }
 
-  private removeSensitiveFields(user: User) {
+  private removeSensitiveFields(user: User): GetUserResponseModel {
     if (user?.password !== undefined) {
       delete user.password;
     }
 
-    return user;
+    return user as unknown as GetUserResponseModel;
   }
 }

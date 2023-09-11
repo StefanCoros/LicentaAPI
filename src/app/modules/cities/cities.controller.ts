@@ -8,10 +8,13 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { CitiesService } from './cities.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
+import { GetCityResponseModel } from './models/get-city-response.model';
+import { PostCityRequestModel } from './models/post-city-request.model';
+import { PutCityRequestModel } from './models/put-city-request.model';
 
 @ApiTags('Cities Controller')
 @UseGuards(JwtGuard)
@@ -21,35 +24,44 @@ export class CitiesController {
 
   @Get()
   @ApiResponse({
-    type: [City],
+    type: [GetCityResponseModel],
   })
-  getAll(): Promise<City[]> {
+  getAll(): Promise<GetCityResponseModel[]> {
     return this.citiesService.getAll();
   }
 
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
-    type: City,
+    type: GetCityResponseModel,
   })
-  getById(@Param('id') id): Promise<City> {
+  getById(@Param('id') id): Promise<GetCityResponseModel> {
     return this.citiesService.getById(id);
   }
 
   @Post()
-  @ApiResponse({
-    type: City,
+  @ApiBody({
+    type: PostCityRequestModel,
   })
-  create(@Body() payload: City): Promise<City> {
+  @ApiResponse({
+    type: GetCityResponseModel,
+  })
+  create(@Body() payload: PostCityRequestModel): Promise<GetCityResponseModel> {
     return this.citiesService.create(payload);
   }
 
   @Put(':id')
   @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: PutCityRequestModel,
+  })
   @ApiResponse({
     type: City,
   })
-  update(@Param('id') id, @Body() payload: City): Promise<City> {
+  update(
+    @Param('id') id,
+    @Body() payload: PutCityRequestModel,
+  ): Promise<GetCityResponseModel> {
     return this.citiesService.updateById(id, payload);
   }
 

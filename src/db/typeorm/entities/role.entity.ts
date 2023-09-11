@@ -13,7 +13,6 @@ export class Role {
   id: number;
 
   @Column({ unique: true })
-  @ApiProperty()
   role: string;
 
   @CreateDateColumn()

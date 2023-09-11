@@ -8,10 +8,13 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/db/typeorm/entities/role.entity';
 import { RolesService } from './roles.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
+import { GetRoleResponseModel } from './models/get-role-response.model';
+import { PostRoleRequestModel } from './models/post-role-request.model';
+import { PutRoleRequestModel } from './models/put-role-request.model';
 
 @ApiTags('Roles Controller')
 @UseGuards(JwtGuard)
@@ -21,35 +24,44 @@ export class RolesController {
 
   @Get()
   @ApiResponse({
-    type: [Role],
+    type: [GetRoleResponseModel],
   })
-  getAll(): Promise<Role[]> {
+  getAll(): Promise<GetRoleResponseModel[]> {
     return this.rolesService.getAll();
   }
 
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
-    type: Role,
+    type: GetRoleResponseModel,
   })
-  getById(@Param('id') id): Promise<Role> {
+  getById(@Param('id') id): Promise<GetRoleResponseModel> {
     return this.rolesService.getById(id);
   }
 
   @Post()
-  @ApiResponse({
-    type: Role,
+  @ApiBody({
+    type: PostRoleRequestModel,
   })
-  create(@Body() payload: Role): Promise<Role> {
+  @ApiResponse({
+    type: GetRoleResponseModel,
+  })
+  create(@Body() payload: PostRoleRequestModel): Promise<GetRoleResponseModel> {
     return this.rolesService.create(payload);
   }
 
   @Put(':id')
   @ApiParam({ name: 'id' })
-  @ApiResponse({
-    type: Role,
+  @ApiBody({
+    type: PutRoleRequestModel,
   })
-  update(@Param('id') id, @Body() payload: Role): Promise<Role> {
+  @ApiResponse({
+    type: GetRoleResponseModel,
+  })
+  update(
+    @Param('id') id,
+    @Body() payload: PutRoleRequestModel,
+  ): Promise<GetRoleResponseModel> {
     return this.rolesService.updateById(id, payload);
   }
 

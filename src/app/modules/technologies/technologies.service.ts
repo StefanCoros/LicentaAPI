@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Technology } from 'src/db/typeorm/entities/technology.entity';
 import { DataSource } from 'typeorm';
+import { PostTechnologyRequestModel } from './models/post-technology-request.model';
+import { PutTechnologyRequestModel } from './models/put-technology-request.model';
 
 @Injectable()
 export class TechnologiesService {
@@ -16,13 +18,17 @@ export class TechnologiesService {
     });
   }
 
-  async create(payload: Partial<Technology>): Promise<Technology> {
-    return this.dataSource.getRepository(Technology).save(payload);
+  async create(payload: PostTechnologyRequestModel): Promise<Technology> {
+    const technology = new Technology();
+
+    technology.name = payload.name;
+
+    return this.dataSource.getRepository(Technology).save(technology);
   }
 
   async updateById(
     id: number,
-    payload: Partial<Technology>,
+    payload: PutTechnologyRequestModel,
   ): Promise<Technology> {
     const technology = await this.dataSource
       .getRepository(Technology)
@@ -30,21 +36,9 @@ export class TechnologiesService {
         id,
       });
 
-    if (payload.id) {
-      delete payload.id;
-    }
+    technology.name = payload.name;
 
-    if (payload.createdAt) {
-      delete payload.createdAt;
-    }
-
-    if (payload.updatedAt) {
-      delete payload.updatedAt;
-    }
-
-    return this.dataSource
-      .getRepository(Technology)
-      .save({ ...technology, ...payload });
+    return this.dataSource.getRepository(Technology).save(technology);
   }
 
   async deleteById(id: number): Promise<any> {

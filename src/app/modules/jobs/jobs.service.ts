@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Job } from 'src/db/typeorm/entities/job.entity';
 import { DataSource } from 'typeorm';
+import { PostJobRequestModel } from './models/post-job-request.model';
+import { PutJobRequestModel } from './models/put-job-request.model';
 
 @Injectable()
 export class JobsService {
@@ -16,43 +18,52 @@ export class JobsService {
     });
   }
 
-  async create(payload: Partial<Job>): Promise<Job> {
-    return this.dataSource.getRepository(Job).save(payload);
+  async create(payload: PostJobRequestModel): Promise<Job> {
+    const job = new Job();
+
+    job.title = payload.title;
+    job.company = payload.company;
+    job.address = payload.address;
+    job.salary = payload.salary;
+    job.employeesNumber = payload.employeesNumber;
+    job.companyType = payload.companyType;
+    job.experienceLevel = payload.experienceLevel;
+    job.postType = payload.postType;
+    job.language = payload.language;
+    job.requirements = payload.requirements;
+    job.responsibilities = payload.responsibilities;
+    job.description = payload.description;
+    job.link = payload.link;
+
+    return this.dataSource.getRepository(Job).save(job);
   }
 
-  async updateById(
-    id: number,
-    payload: Partial<Job>,
-  ): Promise<Job> {
-    const job = await this.dataSource
-      .getRepository(Job)
-      .findOneByOrFail({
-        id,
-      });
+  async updateById(id: number, payload: PutJobRequestModel): Promise<Job> {
+    const job = await this.dataSource.getRepository(Job).findOneByOrFail({
+      id,
+    });
 
-    if (payload.id) {
-      delete payload.id;
-    }
+    job.title = payload.title;
+    job.company = payload.company;
+    job.address = payload.address;
+    job.salary = payload.salary;
+    job.employeesNumber = payload.employeesNumber;
+    job.companyType = payload.companyType;
+    job.experienceLevel = payload.experienceLevel;
+    job.postType = payload.postType;
+    job.language = payload.language;
+    job.requirements = payload.requirements;
+    job.responsibilities = payload.responsibilities;
+    job.description = payload.description;
+    job.link = payload.link;
 
-    if (payload.createdAt) {
-      delete payload.createdAt;
-    }
-
-    if (payload.updatedAt) {
-      delete payload.updatedAt;
-    }
-
-    return this.dataSource
-      .getRepository(Job)
-      .save({ ...job, ...payload });
+    return this.dataSource.getRepository(Job).save(job);
   }
 
   async deleteById(id: number): Promise<any> {
-    const job: Job = await this.dataSource
-      .getRepository(Job)
-      .findOneByOrFail({
-        id: id,
-      });
+    const job: Job = await this.dataSource.getRepository(Job).findOneByOrFail({
+      id: id,
+    });
 
     return !!this.dataSource.getRepository(Job).remove(job);
   }

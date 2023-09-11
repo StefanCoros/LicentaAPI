@@ -8,10 +8,13 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TechnologiesService } from './technologies.service';
 import { Technology } from 'src/db/typeorm/entities/technology.entity';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
+import { GetTechnologyResponseModel } from './models/get-technology-response.model';
+import { PostTechnologyRequestModel } from './models/post-technology-request.model';
+import { PutTechnologyRequestModel } from './models/put-technology-request.model';
 
 @ApiTags('Technologies Controller')
 @UseGuards(JwtGuard)
@@ -21,35 +24,46 @@ export class TechnologiesController {
 
   @Get()
   @ApiResponse({
-    type: [Technology],
+    type: [GetTechnologyResponseModel],
   })
-  getAll(): Promise<Technology[]> {
+  getAll(): Promise<GetTechnologyResponseModel[]> {
     return this.technologiesService.getAll();
   }
 
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
-    type: Technology,
+    type: GetTechnologyResponseModel,
   })
-  getById(@Param('id') id): Promise<Technology> {
+  getById(@Param('id') id): Promise<GetTechnologyResponseModel> {
     return this.technologiesService.getById(id);
   }
 
   @Post()
-  @ApiResponse({
-    type: Technology,
+  @ApiBody({
+    type: PostTechnologyRequestModel,
   })
-  create(@Body() payload: Technology): Promise<Technology> {
+  @ApiResponse({
+    type: GetTechnologyResponseModel,
+  })
+  create(
+    @Body() payload: PostTechnologyRequestModel,
+  ): Promise<GetTechnologyResponseModel> {
     return this.technologiesService.create(payload);
   }
 
   @Put(':id')
   @ApiParam({ name: 'id' })
-  @ApiResponse({
-    type: Technology,
+  @ApiBody({
+    type: PutTechnologyRequestModel,
   })
-  update(@Param('id') id, @Body() payload: Technology): Promise<Technology> {
+  @ApiResponse({
+    type: GetTechnologyResponseModel,
+  })
+  update(
+    @Param('id') id,
+    @Body() payload: PutTechnologyRequestModel,
+  ): Promise<GetTechnologyResponseModel> {
     return this.technologiesService.updateById(id, payload);
   }
 

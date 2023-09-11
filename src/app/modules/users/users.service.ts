@@ -1,52 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { Role } from 'src/db/typeorm/entities/role.entity';
 import { User } from 'src/db/typeorm/entities/user.entity';
 import { DataSource } from 'typeorm';
+import { PostUserRequestModel } from './models/post-user-request.model';
+import { PutUserRequestModel } from './models/put-user-request.model';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class UsersService {
   constructor(private dataSource: DataSource) {}
 
   getAll(): Promise<User[]> {
-    return this.dataSource
-      .getRepository(User)
-      .find();
+    return this.dataSource.getRepository(User).find();
   }
 
   getById(id: number): Promise<User> {
-    return this.dataSource
-      .getRepository(User)
-      .findOneBy({
-        id,
-      });
+    return this.dataSource.getRepository(User).findOneBy({
+      id,
+    });
   }
 
-  async create(payload: Partial<User>): Promise<User> {
-    return this.dataSource.getRepository(User).save(payload);
+  async create(payload: PostUserRequestModel): Promise<User> {
+    const user = new User();
+
+    user.firstName = payload.firstName;
+    user.lastName = payload.lastName;
+    user.email = payload.email;
+    user.password = crypto
+      .createHash('sha256')
+      .update(payload.password)
+      .digest('hex');
+    user.role = payload.role;
+
+    return this.dataSource.getRepository(User).save(user);
   }
 
-  async updateById(id: number, payload: Partial<User>): Promise<User> {
+  async updateById(id: number, payload: PutUserRequestModel): Promise<User> {
     const user = await this.dataSource.getRepository(User).findOneByOrFail({
       id,
     });
 
-    if (payload.id) {
-      delete payload.id;
-    }
+    user.firstName = payload.firstName;
+    user.lastName = payload.lastName;
+    user.email = payload.email;
+    user.password = crypto
+      .createHash('sha256')
+      .update(payload.password)
+      .digest('hex');
+    user.role = payload.role;
 
-    if (payload.password) {
-      delete payload.password;
-    }
-
-    if (payload.createdAt) {
-      delete payload.createdAt;
-    }
-
-    if (payload.updatedAt) {
-      delete payload.updatedAt;
-    }
-
-    return this.dataSource.getRepository(User).save({ ...user, ...payload });
+    return this.dataSource.getRepository(User).save(user);
   }
 
   async deleteById(id: number): Promise<any> {

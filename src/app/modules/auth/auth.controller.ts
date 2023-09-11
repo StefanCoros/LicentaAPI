@@ -1,8 +1,10 @@
 import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../../@core/guards/auth.guard';
 import { Request, Response } from 'express';
+import { PostLoginRequestModel } from './models/post-login-request.model';
+import { PostLoginResponseModel } from './models/post-login-response.model';
 
 @ApiTags('Admin Controller | Auth Controller')
 @Controller('api/admin/auth')
@@ -11,16 +13,10 @@ export class AuthController {
 
   @Post('login')
   @ApiBody({
-    schema: {
-      properties: {
-        email: {
-          type: 'string',
-        },
-        password: {
-          type: 'string',
-        },
-      },
-    },
+    type: PostLoginRequestModel,
+  })
+  @ApiResponse({
+    type: PostLoginResponseModel,
   })
   @UseGuards(AuthGuard)
   async login(

@@ -13,15 +13,12 @@ export class City {
   id: number;
 
   @Column({ unique: true })
-  @ApiProperty()
   name: string;
 
   @Column('float')
-  @ApiProperty()
   latitude: number;
 
   @Column('float')
-  @ApiProperty()
   longitude: number;
 
   @CreateDateColumn()

@@ -15,7 +15,6 @@ export class Technology {
   id: number;
 
   @Column({ unique: true })
-  @ApiProperty()
   name: string;
 
   @CreateDateColumn()

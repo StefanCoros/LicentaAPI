@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { DataSource } from 'typeorm';
+import { PostCityRequestModel } from './models/post-city-request.model';
+import { PutCityRequestModel } from './models/put-city-request.model';
 
 @Injectable()
 export class CitiesService {
@@ -16,28 +18,26 @@ export class CitiesService {
     });
   }
 
-  async create(payload: Partial<City>): Promise<City> {
-    return this.dataSource.getRepository(City).save(payload);
+  async create(payload: PostCityRequestModel): Promise<City> {
+    const city = new City();
+
+    city.name = payload.name;
+    city.latitude = payload.latitude;
+    city.longitude = payload.longitude;
+
+    return this.dataSource.getRepository(City).save(city);
   }
 
-  async updateById(id: number, payload: Partial<City>): Promise<City> {
+  async updateById(id: number, payload: PutCityRequestModel): Promise<City> {
     const city = await this.dataSource.getRepository(City).findOneByOrFail({
       id,
     });
 
-    if (payload.id) {
-      delete payload.id;
-    }
+    city.name = payload.name;
+    city.latitude = payload.latitude;
+    city.longitude = payload.longitude;
 
-    if (payload.createdAt) {
-      delete payload.createdAt;
-    }
-
-    if (payload.updatedAt) {
-      delete payload.updatedAt;
-    }
-
-    return this.dataSource.getRepository(City).save({ ...city, ...payload });
+    return this.dataSource.getRepository(City).save(city);
   }
 
   async deleteById(id: number): Promise<any> {
