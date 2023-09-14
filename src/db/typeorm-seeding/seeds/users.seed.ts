@@ -29,7 +29,7 @@ export class UsersSeed implements Seeder {
           entityManager.create<User>(User, {
             firstName: 'User',
             lastName: user,
-            email: `${user.toLowerCase()}@perquri.com`,
+            email: `${user.toLowerCase()}@it-tracker.com`,
             role: user,
             password: defaultUserPassword,
           }),
