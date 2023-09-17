@@ -30,9 +30,7 @@ export class AuthController {
 
     const { accessJwt, ...result } = await this.authService.login(payload);
 
-    response.cookie('accessJwt', accessJwt, {
-      httpOnly: process.env.NODE_ENV === 'development',
-    });
+    response.cookie('accessJwt', accessJwt);
 
     return response.send(result);
   }
