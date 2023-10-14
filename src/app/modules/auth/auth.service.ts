@@ -78,8 +78,6 @@ export class AuthService {
   }
 
   async register(payload: PostRegisterRequestModel) {
-    console.log(payload);
-
     let user = await this.dataSource.getRepository(User).findOneBy({
       email: payload.email,
     });
