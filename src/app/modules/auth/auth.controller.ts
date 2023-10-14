@@ -12,6 +12,8 @@ import { PostLoginRequestModel } from './models/post-login-request.model';
 import { PostLoginResponseModel } from './models/post-login-response.model';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { PostRegisterRequestModel } from './models/post-register-request.model';
+import { PostForgotPasswordRequestModel } from './models/post-forgot-password-request.model';
+import { PostResetPasswordRequestModel } from './models/post-reset-password-request.model';
 
 @ApiTags('Auth Controller')
 @Controller('api/auth')
@@ -47,5 +49,21 @@ export class AuthController {
   })
   async register(@Body() payload: PostRegisterRequestModel) {
     return this.authService.register(payload);
+  }
+
+  @Post('forgot-password')
+  @ApiBody({
+    type: PostForgotPasswordRequestModel
+  })
+  async forgotPassword(@Req() request: Request, @Body() payload: PostForgotPasswordRequestModel) {
+    return this.authService.forgotPassword(request, payload);
+  }
+
+  @Post('reset-password')
+  @ApiBody({
+    type: PostResetPasswordRequestModel
+  })
+  async resetPassword(@Body() payload: PostResetPasswordRequestModel) {
+    return this.authService.resetPassword(payload);
   }
 }

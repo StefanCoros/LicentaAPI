@@ -5,7 +5,6 @@ import { AuthStrategy } from './strategies/auth.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigService } from 'src/config/config.service';
 import { JwtModule } from '@nestjs/jwt';
-import { Request } from 'express';
 
 @Module({
   controllers: [AuthController],

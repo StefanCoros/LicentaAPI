@@ -31,6 +31,12 @@ export class User {
   @Column('text', {nullable: true, default: null})
   jwt: string;
 
+  @Column('text', {nullable: true, default: null})
+  resetPasswordToken: string;
+
+  @Column({nullable: true, default: null})
+  resetPasswordTokenExpiredAt: Date;
+
   @CreateDateColumn()
   createdAt: Timestamp;
 

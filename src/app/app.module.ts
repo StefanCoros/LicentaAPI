@@ -9,6 +9,8 @@ import { JobsModule } from './modules/jobs/jobs.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { TechnologiesModule } from './modules/technologies/technologies.module';
 import { UsersModule } from './modules/users/users.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -18,6 +20,27 @@ import { UsersModule } from './modules/users/users.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) =>
         configService.getTypeORMConfig(),
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        transport: `smtps://${configService.get(
+          'MAILER_SERVICE_EMAIL',
+        )}:${configService.get('MAILER_SERVICE_PASSWORD')}@smtp.gmail.com`,
+        defaults: {
+          from: '"It-Tracker" <noreply@it-tracker.com>',
+        },
+        template: {
+          dir: path.join(
+            process.cwd(),
+            'src',
+            'app',
+            '@core',
+            'email-templates',
+          ),
+        },
+      }),
     }),
     CoreModule,
     AuthModule,
