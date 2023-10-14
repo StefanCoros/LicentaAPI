@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { User } from 'src/db/typeorm/entities/user.entity';
 import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { Request } from 'express';
+import { PostRegisterRequestModel } from './models/post-register-request.model';
+import { RolesEnum } from 'src/app/@core/models/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +31,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
+  async login(user: Partial<User>) {
     const userResponse = {
       email: user.email,
       role: user.role,
@@ -73,5 +75,30 @@ export class AuthService {
     }
 
     return false;
+  }
+
+  async register(payload: PostRegisterRequestModel) {
+    console.log(payload);
+
+    let user = await this.dataSource.getRepository(User).findOneBy({
+      email: payload.email,
+    });
+
+    if (user) {
+      throw new ForbiddenException('User already exists');
+    }
+
+    user = new User();
+
+    user.firstName = payload.firstName;
+    user.lastName = payload.lastName;
+    user.email = payload.email;
+    user.password = crypto
+      .createHash('sha256')
+      .update(payload.password)
+      .digest('hex');
+    user.role = RolesEnum.Standard;
+
+    return this.dataSource.getRepository(User).save(user);
   }
 }
