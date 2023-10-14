@@ -8,7 +8,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { CitiesService } from './cities.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
@@ -18,6 +18,7 @@ import { PutCityRequestModel } from './models/put-city-request.model';
 
 @ApiTags('Cities Controller')
 @UseGuards(JwtGuard)
+@ApiBearerAuth()
 @Controller('api/cities')
 export class CitiesController {
   constructor(private citiesService: CitiesService) {}

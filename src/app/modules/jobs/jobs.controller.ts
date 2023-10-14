@@ -8,9 +8,8 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
-import { Job } from 'src/db/typeorm/entities/job.entity';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetJobResponseModel } from './models/get-job-response.model';
 import { PostJobRequestModel } from './models/post-job-request.model';
@@ -18,6 +17,7 @@ import { PutJobRequestModel } from './models/put-job-request.model';
 
 @ApiTags('Jobs Controller')
 @UseGuards(JwtGuard)
+@ApiBearerAuth()
 @Controller('api/jobs')
 export class JobsController {
   constructor(private jobsService: JobsService) {}

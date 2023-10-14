@@ -8,8 +8,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Role } from 'src/db/typeorm/entities/role.entity';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetRoleResponseModel } from './models/get-role-response.model';
@@ -18,6 +17,7 @@ import { PutRoleRequestModel } from './models/put-role-request.model';
 
 @ApiTags('Roles Controller')
 @UseGuards(JwtGuard)
+@ApiBearerAuth()
 @Controller('api/roles')
 export class RolesController {
   constructor(private rolesService: RolesService) {}

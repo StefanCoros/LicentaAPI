@@ -3,6 +3,7 @@ import { User } from 'src/db/typeorm/entities/user.entity';
 import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -34,9 +35,11 @@ export class AuthService {
       role: user.role,
     };
 
-    const userEntity = await this.dataSource.getRepository(User).findOneByOrFail({
-      email: user.email,
-    });
+    const userEntity = await this.dataSource
+      .getRepository(User)
+      .findOneByOrFail({
+        email: user.email,
+      });
 
     const jwt = this.jwtService.sign(userResponse);
 
@@ -48,5 +51,27 @@ export class AuthService {
       user: userResponse,
       jwt,
     };
+  }
+
+  async logout(request: Request) {
+    const jwt = (request?.headers?.authorization || '').replace('Bearer ', '');
+
+    if (jwt) {
+      try {
+        const user = await this.dataSource.getRepository(User).findOneByOrFail({
+          jwt,
+        });
+
+        user.jwt = null;
+
+        await this.dataSource.getRepository(User).save(user);
+
+        return true;
+      } catch (error: any) {
+        console.log(error?.message || error);
+      }
+    }
+
+    return false;
   }
 }

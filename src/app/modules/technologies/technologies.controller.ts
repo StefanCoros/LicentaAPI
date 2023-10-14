@@ -8,9 +8,8 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TechnologiesService } from './technologies.service';
-import { Technology } from 'src/db/typeorm/entities/technology.entity';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetTechnologyResponseModel } from './models/get-technology-response.model';
 import { PostTechnologyRequestModel } from './models/post-technology-request.model';
@@ -18,6 +17,7 @@ import { PutTechnologyRequestModel } from './models/put-technology-request.model
 
 @ApiTags('Technologies Controller')
 @UseGuards(JwtGuard)
+@ApiBearerAuth()
 @Controller('api/technologies')
 export class TechnologiesController {
   constructor(private technologiesService: TechnologiesService) {}

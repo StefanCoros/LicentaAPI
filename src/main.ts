@@ -12,6 +12,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://it-tracker-fe-13b5334e362a.herokuapp.com',
     ],
+    allowedHeaders: ['Authorization'],
   });
 
   app.useStaticAssets(join(__dirname, '..', 'public'), {
@@ -21,6 +22,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('IT Tracker API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
