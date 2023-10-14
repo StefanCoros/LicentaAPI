@@ -29,14 +29,14 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = {
+    const userResponse = {
       email: user.email,
       role: user.role,
     };
 
     return {
-      ...payload,
-      accessJwt: this.jwtService.sign(payload),
+      user: userResponse,
+      accessJwt: this.jwtService.sign(userResponse),
     };
   }
 }

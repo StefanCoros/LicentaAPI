@@ -12,7 +12,6 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://it-tracker-fe-13b5334e362a.herokuapp.com',
     ],
-    credentials: true,
   });
 
   app.useStaticAssets(join(__dirname, '..', 'public'), {

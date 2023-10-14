@@ -18,30 +18,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   }
 
   private static extractJWT(request: IncomingMessage): string | null {
-    const cookies = JwtStrategy.parseCookies(request);
+    const accessJwt = (request?.headers?.authorization || '').replace('Bearer ', '');
 
-    if (cookies && 'accessJwt' in cookies) {
-      return cookies.accessJwt.toString();
-    }
-
-    return null;
-  }
-
-  private static parseCookies(request: IncomingMessage) {
-    const list = {};
-    const cookieHeader = request.headers?.cookie;
-
-    if (!cookieHeader) return list;
-
-    cookieHeader.split(`;`).forEach(function (cookie) {
-      let [name, ...rest] = cookie.split(`=`);
-      name = name?.trim();
-      if (!name) return;
-      const value = rest.join(`=`).trim();
-      if (!value) return;
-      list[name] = decodeURIComponent(value);
-    });
-
-    return list;
+    return accessJwt || null;
   }
 }

@@ -28,9 +28,7 @@ export class AuthController {
       payload['role'] = request['user']?.role;
     }
 
-    const { accessJwt, ...result } = await this.authService.login(payload);
-
-    response.cookie('accessJwt', accessJwt);
+    const result = await this.authService.login(payload);
 
     return response.send(result);
   }
