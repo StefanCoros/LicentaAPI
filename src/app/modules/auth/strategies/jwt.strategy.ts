@@ -18,8 +18,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   }
 
   private static extractJWT(request: IncomingMessage): string | null {
-    const accessJwt = (request?.headers?.authorization || '').replace('Bearer ', '');
+    const jwt = (request?.headers?.authorization || '').replace('Bearer ', '');
 
-    return accessJwt || null;
+    return jwt || null;
   }
 }

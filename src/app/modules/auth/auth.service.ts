@@ -34,9 +34,19 @@ export class AuthService {
       role: user.role,
     };
 
+    const userEntity = await this.dataSource.getRepository(User).findOneByOrFail({
+      email: user.email,
+    });
+
+    const jwt = this.jwtService.sign(userResponse);
+
+    userEntity.jwt = jwt;
+
+    await this.dataSource.getRepository(User).save(userEntity);
+
     return {
       user: userResponse,
-      accessJwt: this.jwtService.sign(userResponse),
+      jwt,
     };
   }
 }

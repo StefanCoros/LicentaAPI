@@ -30,7 +30,7 @@ export class UsersController {
     return this.usersService
       .getAll()
       .then((users: User[]) =>
-        users.map((user: User) => this.removeSensitiveFields(user)),
+        users.map((user: User) => this.extractFields(user)),
       );
   }
 
@@ -42,7 +42,7 @@ export class UsersController {
   getById(@Param('id') id): Promise<GetUserResponseModel> {
     return this.usersService
       .getById(id)
-      .then((user: User) => this.removeSensitiveFields(user));
+      .then((user: User) => this.extractFields(user));
   }
 
   @Post()
@@ -55,7 +55,7 @@ export class UsersController {
   create(@Body() payload: PostUserRequestModel): Promise<GetUserResponseModel> {
     return this.usersService
       .create(payload)
-      .then((user: User) => this.removeSensitiveFields(user));
+      .then((user: User) => this.extractFields(user));
   }
 
   @Put(':id')
@@ -72,7 +72,7 @@ export class UsersController {
   ): Promise<GetUserResponseModel> {
     return this.usersService
       .updateById(id, payload)
-      .then((user: User) => this.removeSensitiveFields(user));
+      .then((user: User) => this.extractFields(user));
   }
 
   @Delete(':id')
@@ -84,9 +84,13 @@ export class UsersController {
     return this.usersService.deleteById(id);
   }
 
-  private removeSensitiveFields(user: User): GetUserResponseModel {
-    if (user?.password !== undefined) {
-      delete user.password;
+  private extractFields(user: User): GetUserResponseModel {
+    const safeFields = ['id', 'firstName', 'lastName', 'email', 'role']
+
+    for (const field in user) {
+      if (user.hasOwnProperty(field) && !safeFields.includes(field)) {
+        delete user[field];
+      }
     }
 
     return user as unknown as GetUserResponseModel;

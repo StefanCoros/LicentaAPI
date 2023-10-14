@@ -19,17 +19,11 @@ export class AuthController {
     type: PostLoginResponseModel,
   })
   @UseGuards(AuthGuard)
-  async login(
-    @Req() request: Request,
-    @Body() payload: any,
-    @Res() response: Response,
-  ) {
+  async login(@Req() request: Request, @Body() payload: any) {
     if (request['user']?.role) {
       payload['role'] = request['user']?.role;
     }
 
-    const result = await this.authService.login(payload);
-
-    return response.send(result);
+    return this.authService.login(payload);
   }
 }

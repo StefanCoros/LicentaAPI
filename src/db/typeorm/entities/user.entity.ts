@@ -28,6 +28,9 @@ export class User {
   @Column({ type: 'enum', enum: RolesEnum })
   role: RolesEnum;
 
+  @Column('text')
+  jwt: string;
+
   @CreateDateColumn()
   createdAt: Timestamp;
 
