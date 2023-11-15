@@ -9,12 +9,17 @@ export class JobsService {
   constructor(private dataSource: DataSource) {}
 
   getAll(): Promise<Job[]> {
-    return this.dataSource.getRepository(Job).find();
+    return this.dataSource.getRepository(Job).find({
+      relations: ['technologyStack']
+    });
   }
 
   getById(id: number): Promise<Job> {
-    return this.dataSource.getRepository(Job).findOneBy({
-      id,
+    return this.dataSource.getRepository(Job).findOne({
+      where: {
+        id
+      },
+      relations: ['technologyStack'],
     });
   }
 
