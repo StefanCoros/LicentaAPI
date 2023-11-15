@@ -3,24 +3,45 @@ import { Job } from 'src/db/typeorm/entities/job.entity';
 import { DataSource } from 'typeorm';
 import { PostJobRequestModel } from './models/post-job-request.model';
 import { PutJobRequestModel } from './models/put-job-request.model';
+import { Technology } from 'src/db/typeorm/entities/technology.entity';
 
 @Injectable()
 export class JobsService {
   constructor(private dataSource: DataSource) {}
 
   getAll(): Promise<Job[]> {
-    return this.dataSource.getRepository(Job).find({
-      relations: ['technologyStack']
-    });
+    return this.dataSource
+      .getRepository(Job)
+      .find({
+        relations: ['technologyStack'],
+      })
+      .then((jobs: Job[]) => {
+        return jobs.map((job: Job) => {
+          // @ts-ignore
+          job.technologyStack = job.technologyStack.map(
+            (technology: Technology) => technology.name,
+          );
+          return job;
+        });
+      });
   }
 
   getById(id: number): Promise<Job> {
-    return this.dataSource.getRepository(Job).findOne({
-      where: {
-        id
-      },
-      relations: ['technologyStack'],
-    });
+    return this.dataSource
+      .getRepository(Job)
+      .findOne({
+        where: {
+          id,
+        },
+        relations: ['technologyStack'],
+      })
+      .then((job: Job) => {
+        // @ts-ignore
+        job.technologyStack = job.technologyStack.map(
+          (technology: Technology) => technology.name,
+        );
+        return job;
+      });
   }
 
   async create(payload: PostJobRequestModel): Promise<Job> {
