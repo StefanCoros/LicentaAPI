@@ -1,9 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,6 +22,6 @@ export class Technology {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Job)
-  job: Job;
+  @ManyToMany(() => Job, (job) => job.technologyStack)
+  jobs: Job[];
 }

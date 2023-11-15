@@ -7,54 +7,106 @@ export class JobsSeed implements Seeder {
   async run(factory: Factory, connection: Connection): Promise<void> {
     const jobs = (await import('../db_-_devjob.ro.json')) as unknown as any[];
 
-    for (let i = 1912; i < jobs.length; i++) {
-      const job = jobs[i];
-    // for (const job of jobs) {
+    const job = jobs[0];
+
+    for (const job of jobs) {
       await connection.transaction(async (entityManager: EntityManager) => {
-        const jobEntity = new Job();
+        if (job?.link) {
+          let jobEntity = await entityManager.getRepository(Job).findOne({
+            where: {
+              link: job.link,
+            },
+            relations: ['technologyStack'],
+          });
 
-        jobEntity.title = job?.title || '';
-        jobEntity.company = job?.company || '';
-        jobEntity.address = job?.address || '';
-        jobEntity.salary = job?.salary || '';
-        jobEntity.employeesNumber = job?.employeesNumber || '';
-        jobEntity.companyType = job?.companyType || '';
-        jobEntity.experienceLevel = job?.experienceLevel || '';
-        jobEntity.postType = job?.postType || '';
-        jobEntity.language = job?.language || '';
-        jobEntity.requirements = job?.requirements || '';
-        jobEntity.responsibilities = job?.responsibilities || '';
-        jobEntity.description = job?.description || '';
-        jobEntity.link = job?.link || '';
+          if (!jobEntity) {
+            jobEntity = new Job();
 
-        await entityManager.save(jobEntity);
+            jobEntity.title = job?.title || '';
+            jobEntity.company = job?.company || '';
+            jobEntity.address = job?.address || '';
+            jobEntity.salary = job?.salary || '';
+            jobEntity.employeesNumber = job?.employeesNumber || '';
+            jobEntity.companyType = job?.companyType || '';
+            jobEntity.experienceLevel = job?.experienceLevel || '';
+            jobEntity.postType = job?.postType || '';
+            jobEntity.language = job?.language || '';
+            jobEntity.requirements = job?.requirements || '';
+            jobEntity.responsibilities = job?.responsibilities || '';
+            jobEntity.description = job?.description || '';
+            jobEntity.link = job?.link || '';
 
-        const technologyStack: Technology[] = [];
+            await entityManager.save(jobEntity);
 
-        for (const technology of job?.technologyStack || []) {
-          let technologyEntity: Technology | null = await entityManager
-            .getRepository(Technology)
-            .findOneBy({
-              name: technology || '',
-            });
+            const technologyStack: Technology[] = [];
 
-          if (!technologyEntity) {
-            technologyEntity = new Technology();
+            for (const technology of job?.technologyStack || []) {
+              let technologyEntity: Technology | null = await entityManager
+                .getRepository(Technology)
+                .findOneBy({
+                  name: technology || '',
+                });
 
-            technologyEntity.name = technology || '';
-            technologyEntity.job = jobEntity;
+              if (!technologyEntity) {
+                technologyEntity = new Technology();
 
-            await entityManager
-              .getRepository(Technology)
-              .save(technologyEntity);
+                technologyEntity.name = technology || '';
+
+                await entityManager
+                  .getRepository(Technology)
+                  .save(technologyEntity);
+              }
+
+              technologyStack.push(technologyEntity);
+            }
+
+            jobEntity.technologyStack = technologyStack;
+
+            await entityManager.save(jobEntity);
+          } else {
+            if (jobEntity?.technologyStack?.length !== undefined) {
+              const technologyStack: Technology[] = [
+                ...jobEntity.technologyStack,
+              ];
+
+              // add technology if it is new
+              for (const technology of job?.technologyStack || []) {
+                if (
+                  !technologyStack
+                    .map((technology: Technology) => technology.name)
+                    .includes(technology)
+                ) {
+                  let technologyEntity = await entityManager
+                    .getRepository(Technology)
+                    .findOneBy({
+                      name: technology,
+                    });
+
+                  if (!technologyEntity) {
+                    technologyEntity = new Technology();
+
+                    technologyEntity.name = technology || '';
+
+                    await entityManager
+                      .getRepository(Technology)
+                      .save(technologyEntity);
+                  }
+
+                  jobEntity.technologyStack.push(technologyEntity);
+                }
+              }
+
+              // remove technology if it does not exist anymore
+              // for (const technology of technologyStack) {
+              //   if (!(job?.technologyStack || []).includes(technology)) {
+              //     await entityManager.remove(technology);
+              //   }
+              // }
+
+              await entityManager.save(jobEntity);
+            }
           }
-
-          technologyStack.push(technologyEntity);
         }
-
-        jobEntity.technologyStack = technologyStack;
-
-        await entityManager.save(jobEntity);
       });
     }
   }

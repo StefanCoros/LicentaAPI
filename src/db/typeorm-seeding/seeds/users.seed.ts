@@ -5,36 +5,60 @@ import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
 import * as crypto from 'crypto';
 
 export class UsersSeed implements Seeder {
-  async run(factory: Factory, connection: Connection): Promise<void> {
-    for (const user of [
-      RolesEnum.Admin,
-      RolesEnum.Standard,
-      RolesEnum.Premium,
-    ]) {
-      await connection.transaction((entityManager: EntityManager) => {
-        if (!process?.env?.DEFAULT_USER_PASSWORD?.length) {
-          throw new Error('Unable to seed users');
-        }
+  private dataList = [];
 
-        const defaultUserPassword = crypto
-          .createHash('sha256')
-          .update(process.env.DEFAULT_USER_PASSWORD)
-          .digest('hex');
-
-        if (!defaultUserPassword?.length) {
-          throw new Error('Unable to seed users 2');
-        }
-
-        return entityManager.save([
-          entityManager.create<User>(User, {
-            firstName: 'User',
-            lastName: user,
-            email: `${user.toLowerCase()}@it-tracker.com`,
-            role: user,
-            password: defaultUserPassword,
-          }),
-        ]);
-      });
+  constructor() {
+    if (!process?.env?.DEFAULT_USER_PASSWORD?.length) {
+      throw new Error('Unable to seed users');
     }
+
+    const defaultUserPassword = crypto
+      .createHash('sha256')
+      .update(process.env.DEFAULT_USER_PASSWORD)
+      .digest('hex');
+
+    if (!defaultUserPassword?.length) {
+      throw new Error('Unable to seed users 2');
+    }
+
+    this.dataList = [
+      {
+        firstName: 'User',
+        lastName: RolesEnum.Admin,
+        email: `${RolesEnum.Admin.toLowerCase()}@it-tracker.com`,
+        role: RolesEnum.Admin,
+        password: defaultUserPassword,
+      },
+      {
+        firstName: 'User',
+        lastName: RolesEnum.Standard,
+        email: `${RolesEnum.Standard.toLowerCase()}@it-tracker.com`,
+        role: RolesEnum.Standard,
+        password: defaultUserPassword,
+      },
+      {
+        firstName: 'User',
+        lastName: RolesEnum.Premium,
+        email: `${RolesEnum.Premium.toLowerCase()}@it-tracker.com`,
+        role: RolesEnum.Premium,
+        password: defaultUserPassword,
+      },
+    ];
+  }
+
+  async run(factory: Factory, connection: Connection): Promise<void> {
+    await connection.transaction(async (entityManager: EntityManager) => {
+      for (const data of this.dataList) {
+        if (data?.email) {
+          const userExists = await entityManager.getRepository(User).findOneBy({
+            email: data.email,
+          });
+
+          if (!userExists) {
+            await entityManager.save([entityManager.create<User>(User, data)]);
+          }
+        }
+      }
+    });
   }
 }
