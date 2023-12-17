@@ -7,8 +7,6 @@ export class JobsSeed implements Seeder {
   async run(factory: Factory, connection: Connection): Promise<void> {
     const jobs = (await import('../db_-_devjob.ro.json')) as unknown as any[];
 
-    const job = jobs[0];
-
     for (const job of jobs) {
       await connection.transaction(async (entityManager: EntityManager) => {
         if (job?.link) {

@@ -3,6 +3,7 @@ import { Technology } from 'src/db/typeorm/entities/technology.entity';
 import { DataSource } from 'typeorm';
 import { PostTechnologyRequestModel } from './models/post-technology-request.model';
 import { PutTechnologyRequestModel } from './models/put-technology-request.model';
+import { User } from 'src/db/typeorm/entities/user.entity';
 
 @Injectable()
 export class TechnologiesService {
@@ -12,10 +13,39 @@ export class TechnologiesService {
     return this.dataSource.getRepository(Technology).find();
   }
 
+  async getAllForCurrentUser(currentUserEmail: string): Promise<Technology[]> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['technologies'],
+    });
+
+    return user?.technologies || [];
+  }
+
   getById(id: number): Promise<Technology> {
     return this.dataSource.getRepository(Technology).findOneBy({
       id,
     });
+  }
+
+  async getByIdForCurrentUser(
+    id: number,
+    currentUserEmail: string,
+  ): Promise<Technology> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['technologies'],
+    });
+
+    return (
+      (user?.technologies || []).find(
+        (technology: Technology) => technology.id === id,
+      ) || null
+    );
   }
 
   async create(payload: PostTechnologyRequestModel): Promise<Technology> {
@@ -24,6 +54,41 @@ export class TechnologiesService {
     technology.name = payload.name;
 
     return this.dataSource.getRepository(Technology).save(technology);
+  }
+
+  async createTechnologyLinkForCurrentUser(
+    payload: PostTechnologyRequestModel,
+    currentUserEmail: string,
+  ): Promise<Technology> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['technologies'],
+    });
+
+    const technology = await this.dataSource
+      .getRepository(Technology)
+      .findOneBy({
+        name: payload.name,
+      });
+
+    if (technology) {
+      if (user?.technologies?.length !== undefined) {
+        const userTechnology = user?.technologies?.find(
+          (_technology: Technology) => _technology.id === technology.id,
+        );
+
+        if (!userTechnology) {
+          user.technologies.push(technology);
+          await this.dataSource.getRepository(User).save(user);
+
+          return technology;
+        }
+      }
+    }
+
+    return null;
   }
 
   async updateById(
@@ -41,13 +106,28 @@ export class TechnologiesService {
     return this.dataSource.getRepository(Technology).save(technology);
   }
 
-  async deleteById(id: number): Promise<any> {
-    const technology: Technology = await this.dataSource
-      .getRepository(Technology)
-      .findOneByOrFail({
-        id: id,
-      });
+  async deleteTechnologyLinkForCurrentUser(
+    id: number,
+    currentUserEmail: string,
+  ): Promise<any> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['technologies'],
+    });
 
-    return !!this.dataSource.getRepository(Technology).remove(technology);
+    if (user?.technologies?.length !== undefined) {
+      const userTechnologyIndex = user?.technologies?.findIndex(
+        (_technology: Technology) => _technology.id === id,
+      );
+
+      if (userTechnologyIndex >= 0) {
+        user.technologies.splice(userTechnologyIndex, 1);
+        return !!(await this.dataSource.getRepository(User).save(user));
+      }
+    }
+
+    return false;
   }
 }

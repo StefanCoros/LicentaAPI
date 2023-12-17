@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Job } from './job.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'technologies' })
 export class Technology {
@@ -24,4 +25,7 @@ export class Technology {
 
   @ManyToMany(() => Job, (job) => job.technologyStack)
   jobs: Job[];
+
+  @ManyToMany(() => User, (user) => user.technologies)
+  users: User[];
 }

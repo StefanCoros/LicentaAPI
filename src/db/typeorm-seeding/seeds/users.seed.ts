@@ -3,6 +3,7 @@ import { Factory, Seeder } from 'typeorm-seeding';
 import { User } from '../../typeorm/entities/user.entity';
 import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
 import * as crypto from 'crypto';
+import { Technology } from '../../typeorm/entities/technology.entity';
 
 export class UsersSeed implements Seeder {
   private dataList = [];
@@ -50,15 +51,42 @@ export class UsersSeed implements Seeder {
     await connection.transaction(async (entityManager: EntityManager) => {
       for (const data of this.dataList) {
         if (data?.email) {
-          const userExists = await entityManager.getRepository(User).findOneBy({
-            email: data.email,
+          const existingUser = await entityManager.getRepository(User).findOne({
+            where: { email: data.email },
+            relations: ['technologies'],
           });
 
-          if (!userExists) {
-            await entityManager.save([entityManager.create<User>(User, data)]);
+          if (!existingUser) {
+            const newUser = await entityManager.save(
+              entityManager.create<User>(User, data),
+            );
+            await this.addDefaultTechnologies(entityManager, newUser);
+          } else {
+            await this.addDefaultTechnologies(entityManager, existingUser);
           }
         }
       }
     });
+  }
+
+  private async addDefaultTechnologies(
+    entityManager: EntityManager,
+    user: User,
+  ) {
+    for (const technology of ['React', 'Angular', 'NodeJS', 'JavaScript']) {
+      const technologyEntity = await entityManager
+        .getRepository(Technology)
+        .findOneBy({
+          name: technology,
+        });
+
+      if (technologyEntity) {
+        if (!user.technologies.includes(technologyEntity)) {
+          user.technologies.push(technologyEntity);
+        }
+      }
+    }
+
+    return entityManager.save(user);
   }
 }
