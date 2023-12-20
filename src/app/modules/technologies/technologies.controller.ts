@@ -33,6 +33,14 @@ export class TechnologiesController {
     private jwtService: JwtService,
   ) {}
 
+  @Get('all')
+  @ApiResponse({
+    type: [GetTechnologyResponseModel],
+  })
+  getAll() {
+    return this.technologiesService.getAll();
+  }
+
   @Get()
   @ApiResponse({
     type: [GetTechnologyResponseModel],
@@ -114,23 +122,6 @@ export class TechnologiesController {
 
     return response.send();
   }
-
-  /**
-   * @todo Only an admin should be able to edit technologies
-  @Put(':id')
-  @ApiParam({ name: 'id' })
-  @ApiBody({
-    type: PutTechnologyRequestModel,
-  })
-  @ApiResponse({
-    type: GetTechnologyResponseModel,
-  })
-  update(
-    @Param('id') id,
-    @Body() payload: PutTechnologyRequestModel,
-  ): Promise<GetTechnologyResponseModel> {
-    return this.technologiesService.updateById(id, payload);
-  } */
 
   @Delete(':id')
   @ApiParam({ name: 'id' })

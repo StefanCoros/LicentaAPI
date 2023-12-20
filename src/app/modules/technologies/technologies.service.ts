@@ -48,14 +48,6 @@ export class TechnologiesService {
     );
   }
 
-  async create(payload: PostTechnologyRequestModel): Promise<Technology> {
-    const technology = new Technology();
-
-    technology.name = payload.name;
-
-    return this.dataSource.getRepository(Technology).save(technology);
-  }
-
   async createTechnologyLinkForCurrentUser(
     payload: PostTechnologyRequestModel,
     currentUserEmail: string,
@@ -70,7 +62,7 @@ export class TechnologiesService {
     const technology = await this.dataSource
       .getRepository(Technology)
       .findOneBy({
-        name: payload.name,
+        id: payload.id,
       });
 
     if (technology) {
