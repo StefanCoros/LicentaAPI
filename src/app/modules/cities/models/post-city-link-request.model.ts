@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PutTechnologyRequestModel {
+export class PostCityLinkRequestModel {
   @ApiProperty()
-  name: string;
+  id: number;
 }

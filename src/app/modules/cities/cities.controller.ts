@@ -5,25 +5,35 @@ import {
   Get,
   Param,
   Post,
-  Put,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { City } from 'src/db/typeorm/entities/city.entity';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CitiesService } from './cities.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetCityResponseModel } from './models/get-city-response.model';
-import { PostCityRequestModel } from './models/post-city-request.model';
-import { PutCityRequestModel } from './models/put-city-request.model';
+import { PostCityLinkRequestModel } from './models/post-city-link-request.model';
+import { JwtService } from '@nestjs/jwt';
+import { Request, Response } from 'express';
 
 @ApiTags('Cities Controller')
 @UseGuards(JwtGuard)
 @ApiBearerAuth()
 @Controller('api/cities')
 export class CitiesController {
-  constructor(private citiesService: CitiesService) {}
+  constructor(
+    private citiesService: CitiesService,
+    private jwtService: JwtService,
+  ) {}
 
-  @Get()
+  @Get('all')
   @ApiResponse({
     type: [GetCityResponseModel],
   })
@@ -31,39 +41,85 @@ export class CitiesController {
     return this.citiesService.getAll();
   }
 
+  @Get()
+  @ApiResponse({
+    type: [GetCityResponseModel],
+  })
+  getAllForCurrentUser(
+    @Req() request: Request,
+  ): Promise<GetCityResponseModel[]> {
+    const currentUserEmail =
+      (
+        this.jwtService.decode(
+          (request?.headers?.authorization || '').replace('Bearer ', ''),
+        ) as any
+      )?.email || null;
+
+    return this.citiesService.getAllForCurrentUser(currentUserEmail);
+  }
+
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({
     type: GetCityResponseModel,
   })
-  getById(@Param('id') id): Promise<GetCityResponseModel> {
-    return this.citiesService.getById(id);
+  async getByIdForCurrentUser(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Param('id') id,
+  ): Promise<Response> {
+    const currentUserEmail =
+      (
+        this.jwtService.decode(
+          (request?.headers?.authorization || '').replace('Bearer ', ''),
+        ) as any
+      )?.email || null;
+
+    const city = await this.citiesService.getByIdForCurrentUser(
+      parseInt(id, 10),
+      currentUserEmail,
+    );
+
+    if (!city) {
+      response.status(204);
+    } else {
+      response.json(city);
+    }
+
+    return response.send();
   }
 
   @Post()
   @ApiBody({
-    type: PostCityRequestModel,
+    type: PostCityLinkRequestModel,
   })
   @ApiResponse({
     type: GetCityResponseModel,
   })
-  create(@Body() payload: PostCityRequestModel): Promise<GetCityResponseModel> {
-    return this.citiesService.create(payload);
-  }
+  async createCityLinkForCurrentUser(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Body() payload: PostCityLinkRequestModel,
+  ): Promise<Response> {
+    const currentUserEmail =
+      (
+        this.jwtService.decode(
+          (request?.headers?.authorization || '').replace('Bearer ', ''),
+        ) as any
+      )?.email || null;
 
-  @Put(':id')
-  @ApiParam({ name: 'id' })
-  @ApiBody({
-    type: PutCityRequestModel,
-  })
-  @ApiResponse({
-    type: City,
-  })
-  update(
-    @Param('id') id,
-    @Body() payload: PutCityRequestModel,
-  ): Promise<GetCityResponseModel> {
-    return this.citiesService.updateById(id, payload);
+    const city = await this.citiesService.createCityLinkForCurrentUser(
+      payload,
+      currentUserEmail,
+    );
+
+    if (!city) {
+      response.status(404);
+    } else {
+      response.json(city);
+    }
+
+    return response.send();
   }
 
   @Delete(':id')
@@ -71,7 +127,30 @@ export class CitiesController {
   @ApiResponse({
     type: Boolean,
   })
-  deleteById(@Param('id') id: number): any {
-    return this.citiesService.deleteById(id);
+  async deleteById(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    const currentUserEmail =
+      (
+        this.jwtService.decode(
+          (request?.headers?.authorization || '').replace('Bearer ', ''),
+        ) as any
+      )?.email || null;
+
+    const wasDeleted =
+      await this.citiesService.deleteCityLinkForCurrentUser(
+        parseInt(id, 10),
+        currentUserEmail,
+      );
+
+    if (!wasDeleted) {
+      response.status(404);
+    } else {
+      response.status(200);
+    }
+
+    return response.send();
   }
 }

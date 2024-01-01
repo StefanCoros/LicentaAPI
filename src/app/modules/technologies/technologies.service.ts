@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Technology } from 'src/db/typeorm/entities/technology.entity';
 import { DataSource } from 'typeorm';
 import { PostTechnologyRequestModel } from './models/post-technology-request.model';
-import { PutTechnologyRequestModel } from './models/put-technology-request.model';
 import { User } from 'src/db/typeorm/entities/user.entity';
 
 @Injectable()
@@ -22,12 +21,6 @@ export class TechnologiesService {
     });
 
     return user?.technologies || [];
-  }
-
-  getById(id: number): Promise<Technology> {
-    return this.dataSource.getRepository(Technology).findOneBy({
-      id,
-    });
   }
 
   async getByIdForCurrentUser(
@@ -81,21 +74,6 @@ export class TechnologiesService {
     }
 
     return null;
-  }
-
-  async updateById(
-    id: number,
-    payload: PutTechnologyRequestModel,
-  ): Promise<Technology> {
-    const technology = await this.dataSource
-      .getRepository(Technology)
-      .findOneByOrFail({
-        id,
-      });
-
-    technology.name = payload.name;
-
-    return this.dataSource.getRepository(Technology).save(technology);
   }
 
   async deleteTechnologyLinkForCurrentUser(

@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity({ name: 'cities' })
 export class City {
@@ -25,4 +27,7 @@ export class City {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToMany(() => User, (user) => user.cities)
+  users: User[];
 }

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class LinkUsersAndTechnologiesTable1702845354860 implements MigrationInterface {
-    name = 'LinkUsersAndTechnologiesTable1702845354860'
+export class LinkUsersAndTechnologiesTables1702845354860 implements MigrationInterface {
+    name = 'LinkUsersAndTechnologiesTables1702845354860'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE \`users_technologies_technologies\` (\`usersId\` int NOT NULL, \`technologiesId\` int NOT NULL, INDEX \`IDX_4b183e88b3aae55a5fe57087c8\` (\`usersId\`), INDEX \`IDX_a240ffc539cbea3857c1f147b3\` (\`technologiesId\`), PRIMARY KEY (\`usersId\`, \`technologiesId\`)) ENGINE=InnoDB`);

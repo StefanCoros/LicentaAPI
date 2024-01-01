@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Technology } from './technology.entity';
+import { City } from './city.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -40,13 +41,17 @@ export class User {
   @Column({nullable: true, default: null})
   resetPasswordTokenExpiredAt: Date;
 
-  @ManyToMany(() => Technology, (technology) => technology.users)
-  @JoinTable()
-  technologies: Technology[];
-
   @CreateDateColumn()
   createdAt: Timestamp;
 
   @UpdateDateColumn()
   updatedAt: Timestamp;
+
+  @ManyToMany(() => Technology, (technology) => technology.users)
+  @JoinTable()
+  technologies: Technology[];
+
+  @ManyToMany(() => City, (city) => city.users)
+  @JoinTable()
+  cities: City[];
 }

@@ -4,6 +4,8 @@ import { User } from '../../typeorm/entities/user.entity';
 import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
 import * as crypto from 'crypto';
 import { Technology } from '../../typeorm/entities/technology.entity';
+import { City } from '../../typeorm/entities/city.entity';
+import { DEFAULT_CITIES } from '../models/default-cities.model';
 
 export class UsersSeed implements Seeder {
   private dataList = [];
@@ -53,7 +55,7 @@ export class UsersSeed implements Seeder {
         if (data?.email) {
           const existingUser = await entityManager.getRepository(User).findOne({
             where: { email: data.email },
-            relations: ['technologies'],
+            relations: ['technologies', 'cities'],
           });
 
           if (!existingUser) {
@@ -61,8 +63,10 @@ export class UsersSeed implements Seeder {
               entityManager.create<User>(User, data),
             );
             await this.addDefaultTechnologies(entityManager, newUser);
+            await this.addDefaultCities(entityManager, newUser);
           } else {
             await this.addDefaultTechnologies(entityManager, existingUser);
+            await this.addDefaultCities(entityManager, existingUser);
           }
         }
       }
@@ -83,6 +87,24 @@ export class UsersSeed implements Seeder {
       if (technologyEntity) {
         if (!user.technologies.includes(technologyEntity)) {
           user.technologies.push(technologyEntity);
+        }
+      }
+    }
+
+    return entityManager.save(user);
+  }
+
+  private async addDefaultCities(entityManager: EntityManager, user: User) {
+    const defaultCities = DEFAULT_CITIES;
+
+    for (const defaultCity of defaultCities) {
+      const cityEntity = await entityManager.getRepository(City).findOneBy({
+        name: defaultCity.name,
+      });
+
+      if (cityEntity) {
+        if (!user.cities.includes(cityEntity)) {
+          user.cities.push(cityEntity);
         }
       }
     }

@@ -15,9 +15,10 @@ import { User } from 'src/db/typeorm/entities/user.entity';
 import { GetUserResponseModel } from './models/get-user-response.model';
 import { PostUserRequestModel } from './models/post-user-request.model';
 import { PutUserRequestModel } from './models/put-user-request.model';
+import { AdminRoleGuard } from 'src/app/@core/guards/admin-role.guard';
 
 @ApiTags('Users Controller')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, AdminRoleGuard)
 @ApiBearerAuth()
 @Controller('api/users')
 export class UsersController {

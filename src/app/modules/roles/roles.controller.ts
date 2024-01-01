@@ -14,9 +14,10 @@ import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetRoleResponseModel } from './models/get-role-response.model';
 import { PostRoleRequestModel } from './models/post-role-request.model';
 import { PutRoleRequestModel } from './models/put-role-request.model';
+import { AdminRoleGuard } from 'src/app/@core/guards/admin-role.guard';
 
 @ApiTags('Roles Controller')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, AdminRoleGuard)
 @ApiBearerAuth()
 @Controller('api/roles')
 export class RolesController {

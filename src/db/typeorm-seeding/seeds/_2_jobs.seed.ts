@@ -62,50 +62,54 @@ export class JobsSeed implements Seeder {
 
             await entityManager.save(jobEntity);
           } else {
-            if (jobEntity?.technologyStack?.length !== undefined) {
-              const technologyStack: Technology[] = [
-                ...jobEntity.technologyStack,
-              ];
-
-              // add technology if it is new
-              for (const technology of job?.technologyStack || []) {
-                if (
-                  !technologyStack
-                    .map((technology: Technology) => technology.name)
-                    .includes(technology)
-                ) {
-                  let technologyEntity = await entityManager
-                    .getRepository(Technology)
-                    .findOneBy({
-                      name: technology,
-                    });
-
-                  if (!technologyEntity) {
-                    technologyEntity = new Technology();
-
-                    technologyEntity.name = technology || '';
-
-                    await entityManager
-                      .getRepository(Technology)
-                      .save(technologyEntity);
-                  }
-
-                  jobEntity.technologyStack.push(technologyEntity);
-                }
-              }
-
-              // remove technology if it does not exist anymore
-              // for (const technology of technologyStack) {
-              //   if (!(job?.technologyStack || []).includes(technology)) {
-              //     await entityManager.remove(technology);
-              //   }
-              // }
-
-              await entityManager.save(jobEntity);
-            }
+            await this.addTechnologiesFromTechnologyStack(jobEntity, job, entityManager);
           }
         }
       });
+    }
+  }
+
+  private async addTechnologiesFromTechnologyStack(jobEntity: Job, job: any, entityManager: EntityManager) {
+    if (jobEntity?.technologyStack?.length !== undefined) {
+      const technologyStack: Technology[] = [
+        ...jobEntity.technologyStack,
+      ];
+
+      // add technology if it is new
+      for (const technology of job?.technologyStack || []) {
+        if (
+          !technologyStack
+            .map((technology: Technology) => technology.name)
+            .includes(technology)
+        ) {
+          let technologyEntity = await entityManager
+            .getRepository(Technology)
+            .findOneBy({
+              name: technology,
+            });
+
+          if (!technologyEntity) {
+            technologyEntity = new Technology();
+
+            technologyEntity.name = technology || '';
+
+            await entityManager
+              .getRepository(Technology)
+              .save(technologyEntity);
+          }
+
+          jobEntity.technologyStack.push(technologyEntity);
+        }
+      }
+
+      // remove technology if it does not exist anymore
+      // for (const technology of technologyStack) {
+      //   if (!(job?.technologyStack || []).includes(technology)) {
+      //     await entityManager.remove(technology);
+      //   }
+      // }
+
+      await entityManager.save(jobEntity);
     }
   }
 }

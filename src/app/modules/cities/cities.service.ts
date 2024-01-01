@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { DataSource } from 'typeorm';
-import { PostCityRequestModel } from './models/post-city-request.model';
-import { PutCityRequestModel } from './models/put-city-request.model';
+import { PostCityLinkRequestModel } from './models/post-city-link-request.model';
+import { User } from 'src/db/typeorm/entities/user.entity';
 
 @Injectable()
 export class CitiesService {
@@ -12,41 +12,92 @@ export class CitiesService {
     return this.dataSource.getRepository(City).find();
   }
 
-  getById(id: number): Promise<City> {
-    return this.dataSource.getRepository(City).findOneBy({
-      id,
-    });
-  }
-
-  async create(payload: PostCityRequestModel): Promise<City> {
-    const city = new City();
-
-    city.name = payload.name;
-    city.latitude = payload.latitude;
-    city.longitude = payload.longitude;
-
-    return this.dataSource.getRepository(City).save(city);
-  }
-
-  async updateById(id: number, payload: PutCityRequestModel): Promise<City> {
-    const city = await this.dataSource.getRepository(City).findOneByOrFail({
-      id,
+  async getAllForCurrentUser(currentUserEmail: string): Promise<City[]> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['cities'],
     });
 
-    city.name = payload.name;
-    city.latitude = payload.latitude;
-    city.longitude = payload.longitude;
-
-    return this.dataSource.getRepository(City).save(city);
+    return user?.cities || [];
   }
 
-  async deleteById(id: number): Promise<any> {
-    const city: City = await this.dataSource
+  async getByIdForCurrentUser(
+    id: number,
+    currentUserEmail: string,
+  ): Promise<City> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['cities'],
+    });
+
+    return (
+      (user?.cities || []).find(
+        (city: City) => city.id === id,
+      ) || null
+    );
+  }
+
+  async createCityLinkForCurrentUser(
+    payload: PostCityLinkRequestModel,
+    currentUserEmail: string,
+  ): Promise<City> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['cities'],
+    });
+
+    const city = await this.dataSource
       .getRepository(City)
-      .findOneByOrFail({
-        id: id,
+      .findOneBy({
+        id: payload.id,
       });
 
-    return !!this.dataSource.getRepository(City).remove(city);
+    if (city) {
+      if (user?.cities?.length !== undefined) {
+        const userCity = user?.cities?.find(
+          (_city: City) => _city.id === city.id,
+        );
+
+        if (!userCity) {
+          user.cities.push(city);
+          await this.dataSource.getRepository(User).save(user);
+
+          return city;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  async deleteCityLinkForCurrentUser(
+    id: number,
+    currentUserEmail: string,
+  ): Promise<any> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email: currentUserEmail,
+      },
+      relations: ['cities'],
+    });
+
+    if (user?.cities?.length !== undefined) {
+      const userCityIndex = user?.cities?.findIndex(
+        (_city: City) => _city.id === id,
+      );
+
+      if (userCityIndex >= 0) {
+        user.cities.splice(userCityIndex, 1);
+        return !!(await this.dataSource.getRepository(User).save(user));
+      }
+    }
+
+    return false;
   }
 }

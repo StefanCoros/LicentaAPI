@@ -58,6 +58,6 @@ export class UsersService {
         id: id,
       });
 
-    return !!this.dataSource.getRepository(User).remove(user);
+    return !!(await this.dataSource.getRepository(User).remove(user));
   }
 }
