@@ -1,10 +1,18 @@
 import * as path from 'path';
 
 const baseDir = path.join(__dirname, '..', '../');
-const entitiesPath = `${baseDir}${process.env.TYPEORM_ENTITIES.split('/').join(path.sep)}`;
-const migrationsPath = `${baseDir}${process.env.TYPEORM_MIGRATIONS.split('/').join(path.sep)}`;
-const seedsPath = `${baseDir}${process.env.TYPEORM_SEEDS.split('/').join(path.sep)}`;
-const factoriesPath = `${baseDir}${process.env.TYPEORM_FACTORIES.split('/').join(path.sep)}`;
+const entitiesPath = `${baseDir}${(process?.env?.TYPEORM_ENTITIES || '')
+  .split('/')
+  .join(path.sep)}`;
+const migrationsPath = `${baseDir}${(process?.env?.TYPEORM_MIGRATIONS || '')
+  .split('/')
+  .join(path.sep)}`;
+const seedsPath = `${baseDir}${(process?.env?.TYPEORM_SEEDS || '')
+  .split('/')
+  .join(path.sep)}`;
+const factoriesPath = `${baseDir}${(process?.env?.TYPEORM_FACTORIES || '')
+  .split('/')
+  .join(path.sep)}`;
 
 export default {
   type: process.env.TYPEORM_CONNECTION,
@@ -12,7 +20,7 @@ export default {
   username: process.env.TYPEORM_USERNAME,
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
-  port: Number.parseInt(process.env.TYPEORM_PORT, 10),
+  port: Number.parseInt(process?.env?.TYPEORM_PORT || '', 10),
   logging: true,
   entities: [entitiesPath],
   migrations: [migrationsPath],

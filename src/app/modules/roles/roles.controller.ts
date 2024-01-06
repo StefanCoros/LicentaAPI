@@ -6,15 +6,23 @@ import {
   Param,
   Post,
   Put,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetRoleResponseModel } from './models/get-role-response.model';
 import { PostRoleRequestModel } from './models/post-role-request.model';
 import { PutRoleRequestModel } from './models/put-role-request.model';
 import { AdminRoleGuard } from 'src/app/@core/guards/admin-role.guard';
+import { Response } from 'express';
 
 @ApiTags('Roles Controller')
 @UseGuards(JwtGuard, AdminRoleGuard)
@@ -32,12 +40,24 @@ export class RolesController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', required: true, type: 'string' })
   @ApiResponse({
     type: GetRoleResponseModel,
   })
-  getById(@Param('id') id): Promise<GetRoleResponseModel> {
-    return this.rolesService.getById(id);
+  async getById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response<GetRoleResponseModel>> {
+    const numberId = parseInt(id, 10);
+
+    if (!numberId) {
+      response.status(400);
+    } else {
+      const result = await this.rolesService.getById(numberId);
+
+      return response.send(result);
+    }
+    return response.send();
   }
 
   @Post()
@@ -52,26 +72,50 @@ export class RolesController {
   }
 
   @Put(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', required: true, type: 'string' })
   @ApiBody({
     type: PutRoleRequestModel,
   })
   @ApiResponse({
     type: GetRoleResponseModel,
   })
-  update(
-    @Param('id') id,
+  async update(
+    @Res() response: Response,
+    @Param('id') id: string,
     @Body() payload: PutRoleRequestModel,
-  ): Promise<GetRoleResponseModel> {
-    return this.rolesService.updateById(id, payload);
+  ): Promise<Response<GetRoleResponseModel>> {
+    const numberId = parseInt(id, 10);
+
+    if (!numberId) {
+      response.status(400);
+    } else {
+      const result = await this.rolesService.updateById(numberId, payload);
+
+      return response.send(result);
+    }
+
+    return response.send();
   }
 
   @Delete(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', required: true, type: 'string' })
   @ApiResponse({
     type: Boolean,
   })
-  deleteById(@Param('id') id: number): any {
-    return this.rolesService.deleteById(id);
+  async deleteById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response<Boolean>> {
+    const numberId = parseInt(id, 10);
+
+    if (!numberId) {
+      response.status(400);
+    } else {
+      const result = await this.rolesService.deleteById(numberId);
+
+      return response.send(result);
+    }
+
+    return response.send();
   }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DiacriticsService {
-  replaceDiacriticsWithAnalogLetters = (text) => {
+  getTextWithoutDiacritics = (text: string) => {
     return (
       text
         .replace(/ă/g, 'a')

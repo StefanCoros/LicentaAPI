@@ -13,7 +13,7 @@ export class UsersService {
     return this.dataSource.getRepository(User).find();
   }
 
-  getById(id: number): Promise<User> {
+  getById(id: number): Promise<User | null> {
     return this.dataSource.getRepository(User).findOneBy({
       id,
     });

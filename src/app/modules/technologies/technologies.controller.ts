@@ -59,31 +59,37 @@ export class TechnologiesController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', required: true, type: 'string' })
   @ApiResponse({
     type: GetTechnologyResponseModel,
   })
   async getByIdForCurrentUser(
     @Req() request: Request,
     @Res() response: Response,
-    @Param('id') id,
-  ): Promise<Response> {
-    const currentUserEmail =
-      (
-        this.jwtService.decode(
-          (request?.headers?.authorization || '').replace('Bearer ', ''),
-        ) as any
-      )?.email || null;
+    @Param('id') id: string,
+  ): Promise<Response<GetTechnologyResponseModel>> {
+    const numberId = parseInt(id, 10);
 
-    const technology = await this.technologiesService.getByIdForCurrentUser(
-      parseInt(id, 10),
-      currentUserEmail,
-    );
-
-    if (!technology) {
-      response.status(204);
+    if (!numberId) {
+      response.status(400);
     } else {
-      response.json(technology);
+      const currentUserEmail =
+        (
+          this.jwtService.decode(
+            (request?.headers?.authorization || '').replace('Bearer ', ''),
+          ) as any
+        )?.email || null;
+
+      const technology = await this.technologiesService.getByIdForCurrentUser(
+        numberId,
+        currentUserEmail,
+      );
+
+      if (!technology) {
+        response.status(204);
+      } else {
+        response.json(technology);
+      }
     }
 
     return response.send();
@@ -100,7 +106,7 @@ export class TechnologiesController {
     @Req() request: Request,
     @Res() response: Response,
     @Body() payload: PostTechnologyRequestModel,
-  ): Promise<Response> {
+  ): Promise<Response<GetTechnologyResponseModel>> {
     const currentUserEmail =
       (
         this.jwtService.decode(
@@ -124,7 +130,7 @@ export class TechnologiesController {
   }
 
   @Delete(':id')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', required: true, type: 'string' })
   @ApiResponse({
     type: Boolean,
   })
@@ -132,24 +138,30 @@ export class TechnologiesController {
     @Req() request: Request,
     @Res() response: Response,
     @Param('id') id: string,
-  ): Promise<Response> {
-    const currentUserEmail =
-      (
-        this.jwtService.decode(
-          (request?.headers?.authorization || '').replace('Bearer ', ''),
-        ) as any
-      )?.email || null;
+  ): Promise<Response<Boolean>> {
+    const numberId = parseInt(id, 10);
 
-    const wasDeleted =
-      await this.technologiesService.deleteTechnologyLinkForCurrentUser(
-        parseInt(id, 10),
-        currentUserEmail,
-      );
-
-    if (!wasDeleted) {
-      response.status(404);
+    if (!numberId) {
+      response.status(400);
     } else {
-      response.status(200);
+      const currentUserEmail =
+        (
+          this.jwtService.decode(
+            (request?.headers?.authorization || '').replace('Bearer ', ''),
+          ) as any
+        )?.email || null;
+
+      const wasDeleted =
+        await this.technologiesService.deleteTechnologyLinkForCurrentUser(
+          parseInt(id, 10),
+          currentUserEmail,
+        );
+
+      if (!wasDeleted) {
+        response.status(404);
+      } else {
+        response.status(200);
+      }
     }
 
     return response.send();

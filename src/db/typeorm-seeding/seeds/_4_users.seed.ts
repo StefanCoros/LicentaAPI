@@ -8,7 +8,13 @@ import { City } from '../../typeorm/entities/city.entity';
 import { DEFAULT_CITIES } from '../models/default-cities.model';
 
 export class UsersSeed implements Seeder {
-  private dataList = [];
+  private dataList: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: RolesEnum;
+    password: string;
+  }[] = [];
 
   constructor() {
     if (!process?.env?.DEFAULT_USER_PASSWORD?.length) {

@@ -33,13 +33,13 @@ export class User {
   role: RolesEnum;
 
   @Column('text', {nullable: true, default: null})
-  jwt: string;
+  jwt: string | null;
 
   @Column('text', {nullable: true, default: null})
-  resetPasswordToken: string;
+  resetPasswordToken: string | null;
 
-  @Column({nullable: true, default: null})
-  resetPasswordTokenExpiredAt: Date;
+  @Column('datetime', {nullable: true, default: null})
+  resetPasswordTokenExpiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Timestamp;

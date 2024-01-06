@@ -16,7 +16,7 @@ export class ConfigService {
     this.envConfig = this.validateInput(config);
   }
 
-  get(key) {
+  get(key: string) {
     if (!this.envConfig[key]) {
       throw new Error(`Config value for ${key} not found`);
     }
