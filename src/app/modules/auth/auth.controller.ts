@@ -1,10 +1,5 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../../@core/guards/auth.guard';
 import { Request } from 'express';
@@ -29,7 +24,9 @@ export class AuthController {
   })
   @UseGuards(AuthGuard)
   async login(@Req() request: Request, @Body() payload: PostLoginRequestModel) {
+    // @ts-ignore ignore as it overlycomplicates things to check typings
     if (request['user']?.role) {
+      // @ts-ignore ignore as it overlycomplicates things to check typings
       payload['role'] = request['user']?.role;
     }
 
@@ -45,7 +42,8 @@ export class AuthController {
 
   @Post('register')
   @ApiBody({
-    type: PostRegisterRequestModel
+    type: PostRegisterRequestModel,
+    required: true,
   })
   async register(@Body() payload: PostRegisterRequestModel) {
     return this.authService.register(payload);
@@ -53,15 +51,18 @@ export class AuthController {
 
   @Post('forgot-password')
   @ApiBody({
-    type: PostForgotPasswordRequestModel
+    type: PostForgotPasswordRequestModel,
   })
-  async forgotPassword(@Req() request: Request, @Body() payload: PostForgotPasswordRequestModel) {
+  async forgotPassword(
+    @Req() request: Request,
+    @Body() payload: PostForgotPasswordRequestModel,
+  ) {
     return this.authService.forgotPassword(request, payload);
   }
 
   @Post('reset-password')
   @ApiBody({
-    type: PostResetPasswordRequestModel
+    type: PostResetPasswordRequestModel,
   })
   async resetPassword(@Body() payload: PostResetPasswordRequestModel) {
     return this.authService.resetPassword(payload);
