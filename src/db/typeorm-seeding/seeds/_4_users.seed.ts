@@ -6,9 +6,17 @@ import * as crypto from 'crypto';
 import { Technology } from '../../typeorm/entities/technology.entity';
 import { City } from '../../typeorm/entities/city.entity';
 import { DEFAULT_CITIES } from '../models/default-cities.model';
+import { Role } from '../../typeorm/entities/role.entity';
 
 export class UsersSeed implements Seeder {
-  private dataList = [];
+  private dataList: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: RolesEnum;
+    roleId: number | undefined;
+    password: string;
+  }[] = [];
 
   constructor() {
     if (!process?.env?.DEFAULT_USER_PASSWORD?.length) {
@@ -30,6 +38,7 @@ export class UsersSeed implements Seeder {
         lastName: RolesEnum.Admin,
         email: `${RolesEnum.Admin.toLowerCase()}@it-tracker.com`,
         role: RolesEnum.Admin,
+        roleId: undefined,
         password: defaultUserPassword,
       },
       {
@@ -37,6 +46,7 @@ export class UsersSeed implements Seeder {
         lastName: RolesEnum.Standard,
         email: `${RolesEnum.Standard.toLowerCase()}@it-tracker.com`,
         role: RolesEnum.Standard,
+        roleId: undefined,
         password: defaultUserPassword,
       },
       {
@@ -44,6 +54,7 @@ export class UsersSeed implements Seeder {
         lastName: RolesEnum.Premium,
         email: `${RolesEnum.Premium.toLowerCase()}@it-tracker.com`,
         role: RolesEnum.Premium,
+        roleId: undefined,
         password: defaultUserPassword,
       },
     ];
@@ -52,15 +63,24 @@ export class UsersSeed implements Seeder {
   async run(factory: Factory, connection: Connection): Promise<void> {
     await connection.transaction(async (entityManager: EntityManager) => {
       for (const data of this.dataList) {
-        if (data?.email) {
+        data.roleId =
+          (
+            await entityManager.getRepository(Role).findOneBy({
+              role: data.role,
+            })
+          )?.id || undefined;
+
+        if (data?.email && data.roleId) {
           const existingUser = await entityManager.getRepository(User).findOne({
             where: { email: data.email },
             relations: ['technologies', 'cities'],
           });
 
           if (!existingUser) {
+            const { role, ...userData } = data;
+
             const newUser = await entityManager.save(
-              entityManager.create<User>(User, data),
+              entityManager.create<User>(User, userData),
             );
             await this.addDefaultTechnologies(entityManager, newUser);
             await this.addDefaultCities(entityManager, newUser);

@@ -6,15 +6,24 @@ import {
   Param,
   Post,
   Put,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { JwtGuard } from 'src/app/@core/guards/jwt.guard';
 import { GetRoleResponseModel } from './models/get-role-response.model';
 import { PostRoleRequestModel } from './models/post-role-request.model';
 import { PutRoleRequestModel } from './models/put-role-request.model';
 import { AdminRoleGuard } from 'src/app/@core/guards/admin-role.guard';
+import { Response } from 'express';
+import { ApiError } from 'src/app/@core/models/api-error.model';
 
 @ApiTags('Roles Controller')
 @UseGuards(JwtGuard, AdminRoleGuard)
@@ -71,7 +80,31 @@ export class RolesController {
   @ApiResponse({
     type: Boolean,
   })
-  deleteById(@Param('id') id: number): any {
-    return this.rolesService.deleteById(id);
+  async deleteById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response<Boolean | string>> {
+    const numberId = parseInt(id, 10);
+
+    if (!numberId) {
+      response.status(400);
+    } else {
+      let result = false;
+
+      try {
+        result = await this.rolesService.deleteById(numberId);
+
+        return response.send(result);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          response.status(403);
+          response.write(error.message);
+        }
+      } finally {
+        return response.send(false);
+      }
+    }
+
+    return response.send();
   }
 }

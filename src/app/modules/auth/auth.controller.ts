@@ -29,8 +29,10 @@ export class AuthController {
   })
   @UseGuards(AuthGuard)
   async login(@Req() request: Request, @Body() payload: PostLoginRequestModel) {
-    if (request['user']?.role) {
-      payload['role'] = request['user']?.role;
+    // @ts-ignore ignore as it overlycomplicates things to check typings
+    if (request['user']?.role?.role) {
+      // @ts-ignore ignore as it overlycomplicates things to check typings
+      payload['role'] = request['user']?.role?.role;
     }
 
     return this.authService.login(payload);

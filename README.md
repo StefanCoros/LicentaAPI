@@ -84,7 +84,7 @@ npm run migration:run
 
 To revert last migration run the following command:
 
-npm revert migration:run
+npm run migration:revert
 
 To create an empty migration file run the following command:
 

@@ -17,11 +17,14 @@ export class AdminRoleGuard implements CanActivate {
     if (jwt) {
       return await this.dataSource
         .getRepository(User)
-        .findOneBy({
-          jwt,
+        .findOne({
+          where: {
+            jwt,
+          },
+          relations: ['role'],
         })
         .then((user: User) => {
-          return user.role === RolesEnum.Admin;
+          return user.role.role === RolesEnum.Admin;
         });
     }
 

@@ -3,6 +3,7 @@ import { Role } from 'src/db/typeorm/entities/role.entity';
 import { DataSource } from 'typeorm';
 import { PutRoleRequestModel } from './models/put-role-request.model';
 import { PostRoleRequestModel } from './models/post-role-request.model';
+import { ApiError } from 'src/app/@core/models/api-error.model';
 
 @Injectable()
 export class RolesService {
@@ -37,11 +38,18 @@ export class RolesService {
   }
 
   async deleteById(id: number): Promise<boolean> {
-    const role: Role = await this.dataSource
-      .getRepository(Role)
-      .findOneByOrFail({
-        id: id,
-      });
+    const role: Role = await this.dataSource.getRepository(Role).findOneOrFail({
+      where: {
+        id,
+      },
+      relations: ['users'],
+    });
+
+    if (role?.users?.length > 0) {
+      throw new ApiError(
+        'Role cannot be deleted. Some users have assigned this role.',
+      );
+    }
 
     return !!(await this.dataSource.getRepository(Role).remove(role));
   }
