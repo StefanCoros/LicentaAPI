@@ -23,6 +23,7 @@ import { PostRoleRequestModel } from './models/post-role-request.model';
 import { PutRoleRequestModel } from './models/put-role-request.model';
 import { AdminRoleGuard } from 'src/app/@core/guards/admin-role.guard';
 import { Response } from 'express';
+import { ApiError } from 'src/app/@core/models/api-error.model';
 
 @ApiTags('Roles Controller')
 @UseGuards(JwtGuard, AdminRoleGuard)
@@ -105,15 +106,26 @@ export class RolesController {
   async deleteById(
     @Res() response: Response,
     @Param('id') id: string,
-  ): Promise<Response<Boolean>> {
+  ): Promise<Response<Boolean | string>> {
     const numberId = parseInt(id, 10);
 
     if (!numberId) {
       response.status(400);
     } else {
-      const result = await this.rolesService.deleteById(numberId);
+      let result = false;
 
-      return response.send(result);
+      try {
+        result = await this.rolesService.deleteById(numberId);
+
+        return response.send(result);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          response.status(403);
+          response.write(error.message);
+        }
+      } finally {
+        return response.send(false);
+      }
     }
 
     return response.send();

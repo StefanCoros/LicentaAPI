@@ -14,6 +14,7 @@ import { RolesEnum } from 'src/app/@core/models/enums/roles.enum';
 import { PostForgotPasswordRequestModel } from './models/post-forgot-password-request.model';
 import { EmailService } from '../../@core/services/email.service';
 import { PostResetPasswordRequestModel } from './models/post-reset-password-request.model';
+import { Role } from 'src/db/typeorm/entities/role.entity';
 
 @Injectable()
 export class AuthService {
@@ -24,8 +25,11 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
-    const user = await this.dataSource.getRepository(User).findOneBy({
-      email,
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: {
+        email,
+      },
+      relations: ['role'],
     });
 
     if (password?.length) {
@@ -108,7 +112,16 @@ export class AuthService {
       .createHash('sha256')
       .update(payload.password)
       .digest('hex');
-    user.role = RolesEnum.Standard;
+
+    const role = await this.dataSource.getRepository(Role).findOneBy({
+      role: RolesEnum.Standard,
+    });
+
+    if (!role) {
+      throw new Error('Standard role not found.');
+    }
+
+    user.role = role;
 
     return this.dataSource.getRepository(User).save(user);
   }

@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { PostUserRequestModel } from './models/post-user-request.model';
 import { PutUserRequestModel } from './models/put-user-request.model';
 import * as crypto from 'crypto';
+import { Role } from 'src/db/typeorm/entities/role.entity';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +30,16 @@ export class UsersService {
       .createHash('sha256')
       .update(payload.password)
       .digest('hex');
-    user.role = payload.role;
+
+    const role = await this.dataSource.getRepository(Role).findOneBy({
+      role: payload.role,
+    });
+
+    if (!role) {
+      throw new Error('Provided role not found.');
+    }
+
+    user.role = role;
 
     return this.dataSource.getRepository(User).save(user);
   }
@@ -46,7 +56,16 @@ export class UsersService {
       .createHash('sha256')
       .update(payload.password)
       .digest('hex');
-    user.role = payload.role;
+
+    const role = await this.dataSource.getRepository(Role).findOneBy({
+      role: payload.role,
+    });
+
+    if (!role) {
+      throw new Error('Provided role not found.');
+    }
+
+    user.role = role;
 
     return this.dataSource.getRepository(User).save(user);
   }
