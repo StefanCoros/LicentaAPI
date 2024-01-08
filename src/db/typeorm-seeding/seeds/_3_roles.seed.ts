@@ -4,20 +4,20 @@ import { Role } from '../../typeorm/entities/role.entity';
 import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
 
 export class RolesSeed implements Seeder {
-  private dataList = [];
+  private dataList: { role: RolesEnum }[] = [];
 
   constructor() {
     this.dataList = [
       {
-        role: RolesEnum.Admin
+        role: RolesEnum.Admin,
       },
       {
-        role: RolesEnum.Premium
+        role: RolesEnum.Premium,
       },
       {
-        role: RolesEnum.Standard
-      }
-    ]
+        role: RolesEnum.Standard,
+      },
+    ];
   }
 
   async run(factory: Factory, connection: Connection): Promise<void> {

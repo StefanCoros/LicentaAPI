@@ -26,7 +26,7 @@ export class TechnologiesService {
   async getByIdForCurrentUser(
     id: number,
     currentUserEmail: string,
-  ): Promise<Technology> {
+  ): Promise<Technology | null> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
         email: currentUserEmail,
@@ -44,7 +44,7 @@ export class TechnologiesService {
   async createTechnologyLinkForCurrentUser(
     payload: PostTechnologyRequestModel,
     currentUserEmail: string,
-  ): Promise<Technology> {
+  ): Promise<Technology | null> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
         email: currentUserEmail,

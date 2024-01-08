@@ -30,7 +30,7 @@ export class JobsService {
       ],
     });
 
-    const jobs = user.technologies.reduce(
+    const jobs = (user?.technologies || []).reduce(
       (jobArray: Job[], technology: Technology) =>
         jobArray.concat(technology.jobs),
       [],
@@ -39,6 +39,13 @@ export class JobsService {
     return jobs
       .filter((job) => this.filterByCurrentUserCities(job, user))
       .map((job) => this.extractTechnologyNameFromJob(job))
+      .map((job) => {
+        job.address = this.diacriticsService.getTextWithoutDiacritics(
+          job?.address || '',
+        );
+
+        return job;
+      })
       .sort(this.sortJobsByAverageSalary);
   }
 
@@ -51,7 +58,15 @@ export class JobsService {
         },
         relations: ['technologyStack'],
       })
-      .then((job: Job) => this.extractTechnologyNameFromJob(job));
+      .then((job: Job) => {
+        job = this.extractTechnologyNameFromJob(job);
+
+        job.address = this.diacriticsService.getTextWithoutDiacritics(
+          job?.address || '',
+        );
+
+        return job;
+      });
   }
 
   async create(payload: PostJobRequestModel): Promise<Job> {
@@ -104,11 +119,15 @@ export class JobsService {
     return !!(await this.dataSource.getRepository(Job).remove(job));
   }
 
-  private filterByCurrentUserCities(job: Job, user: User) {
+  private filterByCurrentUserCities(job: Job, user: User | null) {
     if (user) {
       for (const city of user.cities) {
-        const normalizedJobAddress = this.diacriticsService.replaceDiacriticsWithAnalogLetters(job.address).toLowerCase();
-        const normalizedCity = this.diacriticsService.replaceDiacriticsWithAnalogLetters(city.name).toLowerCase();
+        const normalizedJobAddress = this.diacriticsService
+          .getTextWithoutDiacritics(job.address)
+          .toLowerCase();
+        const normalizedCity = this.diacriticsService
+          .getTextWithoutDiacritics(city.name)
+          .toLowerCase();
 
         if (normalizedJobAddress.includes(normalizedCity)) {
           return true;

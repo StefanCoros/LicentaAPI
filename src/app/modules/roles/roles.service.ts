@@ -13,7 +13,7 @@ export class RolesService {
     return this.dataSource.getRepository(Role).find();
   }
 
-  getById(id: number): Promise<Role> {
+  getById(id: number): Promise<Role | null> {
     return this.dataSource.getRepository(Role).findOneBy({
       id,
     });

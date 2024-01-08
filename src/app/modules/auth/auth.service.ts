@@ -38,6 +38,7 @@ export class AuthService {
 
     if (user) {
       if (password === user.password) {
+        // @ts-ignore ignore as it overlycomplicates things to check typings
         delete user.password;
 
         return user;
