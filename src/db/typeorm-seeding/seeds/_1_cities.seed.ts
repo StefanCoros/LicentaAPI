@@ -15,7 +15,7 @@ export class CitiesSeed implements Seeder {
       for (const data of this.dataList) {
         if (data?.name) {
           const roleExists = await entityManager.getRepository(City).findOneBy({
-            name: data.name,
+            name: data.name || '',
           });
 
           if (!roleExists) {

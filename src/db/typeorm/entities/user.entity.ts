@@ -45,7 +45,11 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Timestamp;
 
-  @ManyToOne(() => Role, (role) => role.users, { onDelete: 'RESTRICT' })
+  @ManyToOne(
+    () => Role,
+    (role) => role.users,
+    { onDelete: 'RESTRICT' },
+  )
   @JoinTable()
   role: Role;
 

@@ -19,7 +19,7 @@ export class AdminRoleGuard implements CanActivate {
         .getRepository(User)
         .findOne({
           where: {
-            jwt,
+            jwt: jwt || '',
           },
           relations: ['role'],
         })

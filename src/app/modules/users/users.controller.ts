@@ -24,7 +24,7 @@ import { PostUserRequestModel } from './models/post-user-request.model';
 import { PutUserRequestModel } from './models/put-user-request.model';
 import { AdminRoleGuard } from 'src/app/@core/guards/admin-role.guard';
 import { Response } from 'express';
-import { RolesEnum } from 'src/app/@core/models/enums/roles.enum';
+import { ApiError } from 'src/app/@core/models/api-error.model';
 
 @ApiTags('Users Controller')
 @UseGuards(JwtGuard, AdminRoleGuard)
@@ -76,10 +76,26 @@ export class UsersController {
   @ApiResponse({
     type: GetUserResponseModel,
   })
-  create(@Body() payload: PostUserRequestModel): Promise<GetUserResponseModel> {
-    return this.usersService
-      .create(payload)
-      .then((user: User) => this.extractFields(user));
+  async create(
+    @Res() response: Response,
+    @Body() payload: PostUserRequestModel,
+  ): Promise<Response<GetUserResponseModel | boolean>> {
+    let result: any = false;
+
+    try {
+      result = await this.usersService
+        .create(payload)
+        .then((user: User) => this.extractFields(user));
+    } catch (error: any) {
+      if (error instanceof ApiError) {
+        response.status(error.statusCode);
+        result = error.message;
+      } else {
+        response.status(500);
+      }
+    }
+
+    return response.send(result);
   }
 
   @Put(':id')

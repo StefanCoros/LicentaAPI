@@ -15,7 +15,7 @@ export class TechnologiesService {
   async getAllForCurrentUser(currentUserEmail: string): Promise<Technology[]> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['technologies'],
     });
@@ -29,7 +29,7 @@ export class TechnologiesService {
   ): Promise<Technology | null> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['technologies'],
     });
@@ -47,7 +47,7 @@ export class TechnologiesService {
   ): Promise<Technology | null> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['technologies'],
     });
@@ -55,7 +55,7 @@ export class TechnologiesService {
     const technology = await this.dataSource
       .getRepository(Technology)
       .findOneBy({
-        id: payload.id,
+        id: payload.id || 0,
       });
 
     if (technology) {
@@ -82,7 +82,7 @@ export class TechnologiesService {
   ): Promise<any> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['technologies'],
     });

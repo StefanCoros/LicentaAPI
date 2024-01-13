@@ -15,7 +15,7 @@ export class RolesService {
 
   getById(id: number): Promise<Role | null> {
     return this.dataSource.getRepository(Role).findOneBy({
-      id,
+      id: id || 0,
     });
   }
 
@@ -29,7 +29,7 @@ export class RolesService {
 
   async updateById(id: number, payload: PutRoleRequestModel): Promise<Role> {
     const role = await this.dataSource.getRepository(Role).findOneByOrFail({
-      id,
+      id: id || 0,
     });
 
     role.role = payload.role;
@@ -40,7 +40,7 @@ export class RolesService {
   async deleteById(id: number): Promise<boolean> {
     const role: Role = await this.dataSource.getRepository(Role).findOneOrFail({
       where: {
-        id,
+        id: id || 0,
       },
       relations: ['users'],
     });
@@ -48,7 +48,7 @@ export class RolesService {
     if (role?.users?.length > 0) {
       throw new ApiError(
         403,
-        'Role cannot be deleted. Some users have assigned this role.',
+        'Rolul nu poate fi şters. Unii utilizatori au acest rol asignat.',
       );
     }
 

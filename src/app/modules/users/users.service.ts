@@ -5,60 +5,102 @@ import { PostUserRequestModel } from './models/post-user-request.model';
 import { PutUserRequestModel } from './models/put-user-request.model';
 import * as crypto from 'crypto';
 import { Role } from 'src/db/typeorm/entities/role.entity';
+import { ApiError } from 'src/app/@core/models/api-error.model';
+import { EmailService } from 'src/app/@core/services/email.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private emailService: EmailService,
+  ) {}
 
   getAll(): Promise<User[]> {
-    return this.dataSource.getRepository(User).find();
+    return this.dataSource
+      .getRepository(User)
+      .find({
+        relations: ['role'],
+      })
+      .then((users: User[]) =>
+        users.map((user: User) => this.extractRoleNameFromUser(user)),
+      );
   }
 
   getById(id: number): Promise<User | null> {
-    return this.dataSource.getRepository(User).findOneBy({
-      id,
-    });
+    return this.dataSource
+      .getRepository(User)
+      .findOne({
+        where: {
+          id: id || 0,
+        },
+        relations: ['role'],
+      })
+      .then((user: User) => this.extractRoleNameFromUser(user));
   }
 
   async create(payload: PostUserRequestModel): Promise<User> {
+    const password = this.generatePaswsord();
+
+    const userExists = await this.dataSource.getRepository(User).findOneBy({
+      email: payload.email || '',
+    });
+
+    if (userExists) {
+      throw new ApiError(400, 'Un utilizator cu acest email deja există.')
+    }
+
     const user = new User();
 
     user.firstName = payload.firstName;
     user.lastName = payload.lastName;
     user.email = payload.email;
-    user.password = crypto
-      .createHash('sha256')
-      .update(payload.password)
-      .digest('hex');
+    user.password = crypto.createHash('sha256').update(password).digest('hex');
 
     const role = await this.dataSource.getRepository(Role).findOneBy({
-      role: payload.role,
+      role: payload.role || '',
     });
 
     if (!role) {
-      throw new Error('Provided role not found.');
+      throw new ApiError(400, 'Rolul nu a fost găsit.');
     }
 
     user.role = role;
 
-    return this.dataSource.getRepository(User).save(user);
+    try {
+      let result = await this.dataSource
+        .getRepository(User)
+        .save(user)
+        .then((user: User) => this.extractRoleNameFromUser(user));
+
+      try {
+        await this.sendInitialEmail(result, password);
+      } catch (error: any) {
+        await this.dataSource.getRepository(User);
+
+        throw new ApiError(500, 'Nu am putut trimite emailul de confirmare');
+      }
+
+      return result;
+    } catch (error: any) {
+      if (error instanceof ApiError) {
+        throw error;
+      } else {
+        throw new ApiError(500);
+      }
+    }
   }
 
   async updateById(id: number, payload: PutUserRequestModel): Promise<User> {
     const user = await this.dataSource.getRepository(User).findOneByOrFail({
-      id,
+      id: id || 0,
     });
 
     user.firstName = payload.firstName;
     user.lastName = payload.lastName;
     user.email = payload.email;
-    user.password = crypto
-      .createHash('sha256')
-      .update(payload.password)
-      .digest('hex');
 
     const role = await this.dataSource.getRepository(Role).findOneBy({
-      role: payload.role,
+      role: payload.role || '',
     });
 
     if (!role) {
@@ -67,16 +109,34 @@ export class UsersService {
 
     user.role = role;
 
-    return this.dataSource.getRepository(User).save(user);
+    return this.dataSource
+      .getRepository(User)
+      .save(user)
+      .then((user: User) => this.extractRoleNameFromUser(user));
   }
 
   async deleteById(id: number): Promise<any> {
     const user: User = await this.dataSource
       .getRepository(User)
       .findOneByOrFail({
-        id: id,
+        id: id || 0,
       });
 
     return !!(await this.dataSource.getRepository(User).remove(user));
+  }
+
+  private generatePaswsord() {
+    return crypto.randomBytes(8).toString('hex');
+  }
+
+  private sendInitialEmail(user: User, password: string) {
+    return this.emailService.sendRegistrationConfirmationEmail(user, password);
+  }
+
+  private extractRoleNameFromUser(user: User) {
+    // @ts-ignore
+    user.role = user?.role?.role || null;
+
+    return user;
   }
 }

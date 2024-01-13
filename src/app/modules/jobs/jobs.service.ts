@@ -20,7 +20,7 @@ export class JobsService {
   ): Promise<GetJobResponseModel[]> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: [
         'technologies',
@@ -54,7 +54,7 @@ export class JobsService {
       .getRepository(Job)
       .findOne({
         where: {
-          id,
+          id: id || 0,
         },
         relations: ['technologyStack'],
       })
@@ -91,7 +91,7 @@ export class JobsService {
 
   async updateById(id: number, payload: PutJobRequestModel): Promise<Job> {
     const job = await this.dataSource.getRepository(Job).findOneByOrFail({
-      id,
+      id: id || 0,
     });
 
     job.title = payload.title;
@@ -113,7 +113,7 @@ export class JobsService {
 
   async deleteById(id: number): Promise<any> {
     const job: Job = await this.dataSource.getRepository(Job).findOneByOrFail({
-      id: id,
+      id: id || 0,
     });
 
     return !!(await this.dataSource.getRepository(Job).remove(job));

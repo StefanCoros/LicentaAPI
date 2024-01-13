@@ -12,8 +12,5 @@ export class PostUserRequestModel {
   email: string;
 
   @ApiProperty()
-  password: string;
-
-  @ApiProperty()
   role: RolesEnum;
 }

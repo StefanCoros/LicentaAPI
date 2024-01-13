@@ -66,13 +66,13 @@ export class UsersSeed implements Seeder {
         data.roleId =
           (
             await entityManager.getRepository(Role).findOneBy({
-              role: data.role,
+              role: data.role || '',
             })
           )?.id || undefined;
 
         if (data?.email && data.roleId) {
           const existingUser = await entityManager.getRepository(User).findOne({
-            where: { email: data.email },
+            where: { email: data.email || '' },
             relations: ['technologies', 'cities'],
           });
 
@@ -101,7 +101,7 @@ export class UsersSeed implements Seeder {
       const technologyEntity = await entityManager
         .getRepository(Technology)
         .findOneBy({
-          name: technology,
+          name: technology || '',
         });
 
       if (technologyEntity) {
@@ -119,7 +119,7 @@ export class UsersSeed implements Seeder {
 
     for (const defaultCity of defaultCities) {
       const cityEntity = await entityManager.getRepository(City).findOneBy({
-        name: defaultCity.name,
+        name: defaultCity.name || '',
       });
 
       if (cityEntity) {

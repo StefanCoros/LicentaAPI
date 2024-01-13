@@ -12,7 +12,7 @@ export class JobsSeed implements Seeder {
         if (job?.link) {
           let jobEntity = await entityManager.getRepository(Job).findOne({
             where: {
-              link: job.link,
+              link: job.link || '',
             },
             relations: ['technologyStack'],
           });
@@ -85,7 +85,7 @@ export class JobsSeed implements Seeder {
           let technologyEntity = await entityManager
             .getRepository(Technology)
             .findOneBy({
-              name: technology,
+              name: technology || '',
             });
 
           if (!technologyEntity) {

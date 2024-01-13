@@ -27,7 +27,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email,
+        email: email || '',
       },
       relations: ['role'],
     });
@@ -57,7 +57,7 @@ export class AuthService {
     const userEntity = await this.dataSource
       .getRepository(User)
       .findOneByOrFail({
-        email: user.email,
+        email: user.email || '',
       });
 
     const jwt = this.jwtService.sign(userResponse);
@@ -78,7 +78,7 @@ export class AuthService {
     if (jwt) {
       try {
         const user = await this.dataSource.getRepository(User).findOneByOrFail({
-          jwt,
+          jwt: jwt || '',
         });
 
         user.jwt = null;
@@ -96,7 +96,7 @@ export class AuthService {
 
   async register(payload: PostRegisterRequestModel) {
     let user = await this.dataSource.getRepository(User).findOneBy({
-      email: payload.email,
+      email: payload.email || '',
     });
 
     if (user) {
@@ -114,7 +114,7 @@ export class AuthService {
       .digest('hex');
 
     const role = await this.dataSource.getRepository(Role).findOneBy({
-      role: RolesEnum.Standard,
+      role: RolesEnum.Standard || '',
     });
 
     if (!role) {
@@ -134,7 +134,7 @@ export class AuthService {
 
     if (link) {
       const user = await this.dataSource.getRepository(User).findOneBy({
-        email: payload.email,
+        email: payload.email || '',
       });
 
       if (user) {
@@ -167,7 +167,7 @@ export class AuthService {
       payload.password === payload.confirmPassword
     ) {
       const user = await this.dataSource.getRepository(User).findOneBy({
-        resetPasswordToken: payload.resetPasswordToken,
+        resetPasswordToken: payload.resetPasswordToken || '',
       });
 
       if (user && user?.resetPasswordTokenExpiredAt instanceof Date) {

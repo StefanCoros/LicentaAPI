@@ -26,7 +26,7 @@ export class CitiesService {
 
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['cities'],
     });
@@ -46,7 +46,7 @@ export class CitiesService {
 
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['cities'],
     });
@@ -72,13 +72,13 @@ export class CitiesService {
   ): Promise<City | null> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['cities'],
     });
 
     const city = await this.dataSource.getRepository(City).findOneBy({
-      id: payload.id,
+      id: payload.id || 0,
     });
 
     if (city) {
@@ -109,7 +109,7 @@ export class CitiesService {
   ): Promise<any> {
     const user = await this.dataSource.getRepository(User).findOne({
       where: {
-        email: currentUserEmail,
+        email: currentUserEmail || '',
       },
       relations: ['cities'],
     });

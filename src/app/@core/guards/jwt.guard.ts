@@ -17,11 +17,14 @@ export class JwtGuard extends AuthGuard('admin-jwt') {
     ).replace('Bearer ', '');
 
     if (jwt) {
-      return this.dataSource.getRepository(User).findOneBy({
-        jwt,
-      }).then((user: User) => {
-        return user !== null;
-      });
+      return this.dataSource
+        .getRepository(User)
+        .findOneBy({
+          jwt: jwt || '',
+        })
+        .then((user: User) => {
+          return user !== null;
+        });
     }
 
     return false;
