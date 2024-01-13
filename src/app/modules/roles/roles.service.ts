@@ -47,6 +47,7 @@ export class RolesService {
 
     if (role?.users?.length > 0) {
       throw new ApiError(
+        403,
         'Role cannot be deleted. Some users have assigned this role.',
       );
     }

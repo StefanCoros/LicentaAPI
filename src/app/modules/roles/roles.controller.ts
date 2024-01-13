@@ -120,11 +120,11 @@ export class RolesController {
         return response.send(result);
       } catch (error) {
         if (error instanceof ApiError) {
-          response.status(403);
+          response.status(error.statusCode);
           response.write(error.message);
+        } else {
+          return response.send(false);
         }
-      } finally {
-        return response.send(false);
       }
     }
 
