@@ -16,6 +16,7 @@ export class EmailService {
       .sendMail({
         to: user?.email,
         from: 'support@it-tracker.com',
+        replyTo: 'support@it-tracker.com',
         subject: `Bine ai venit pe platforma IT Tracker, ${user.firstName}`,
         text: `Bine ai venit pe platforma IT Tracker. Foloseste această parolă "${password}" la prima logare.`,
       })
