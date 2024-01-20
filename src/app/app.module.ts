@@ -29,7 +29,7 @@ import * as path from 'path';
           'MAILER_SERVICE_EMAIL',
         )}:${configService.get('MAILER_SERVICE_PASSWORD')}@smtp.gmail.com`,
         defaults: {
-          from: '"It-Tracker" <noreply@it-tracker.com>',
+          from: '"It-Tracker" <ittrackerplatform@gmail.com>',
         },
         template: {
           dir: path.join(

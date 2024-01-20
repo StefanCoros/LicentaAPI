@@ -14,11 +14,11 @@ export class CitiesSeed implements Seeder {
     await connection.transaction(async (entityManager: EntityManager) => {
       for (const data of this.dataList) {
         if (data?.name) {
-          const roleExists = await entityManager.getRepository(City).findOneBy({
+          const cityExists = await entityManager.getRepository(City).findOneBy({
             name: data.name || '',
           });
 
-          if (!roleExists) {
+          if (!cityExists) {
             await entityManager.save([entityManager.create<City>(City, data)]);
           }
         }

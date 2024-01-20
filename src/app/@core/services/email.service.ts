@@ -15,8 +15,8 @@ export class EmailService {
     return this.mailerService
       .sendMail({
         to: user?.email,
-        from: 'support@it-tracker.com',
-        replyTo: 'support@it-tracker.com',
+        from: 'ittrackerplatform@gmail.com',
+        replyTo: 'ittrackerplatform@gmail.com',
         subject: `Bine ai venit pe platforma IT Tracker, ${user.firstName}`,
         text: `Bine ai venit pe platforma IT Tracker. Foloseste această parolă "${password}" la prima logare.`,
       })
@@ -32,7 +32,7 @@ export class EmailService {
     return this.mailerService
       .sendMail({
         to: payload.email,
-        from: 'support@it-tracker.com',
+        from: 'ittrackerplatform@gmail.com',
         subject: 'Setare parolă nouă',
         text: `Foloseşte acest link ${link} pentru a reseta parola`,
       })
