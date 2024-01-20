@@ -5,7 +5,7 @@ import { Technology } from '../../typeorm/entities/technology.entity';
 
 export class JobsSeed implements Seeder {
   async run(factory: Factory, connection: Connection): Promise<void> {
-    const jobs = (await import('../db_-_devjob.ro.json')) as unknown as any[];
+    const jobs = (await import('../db_-_devjob.ro_-_2.json')) as unknown as any[];
 
     for (const job of jobs) {
       await connection.transaction(async (entityManager: EntityManager) => {
