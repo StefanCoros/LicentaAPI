@@ -17,10 +17,10 @@ export class City {
   name: string;
 
   @Column('float', {nullable: true})
-  latitude: number;
+  latitude: number | null;
 
   @Column('float', {nullable: true})
-  longitude: number;
+  longitude: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,8 +1,8 @@
 export const DEFAULT_CITIES = [
   {
     name: 'Remote',
-    latitude: 0,
-    longitude: 0,
+    latitude: null,
+    longitude: null,
   },
   {
     name: 'Iaşi',

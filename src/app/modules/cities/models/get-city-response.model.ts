@@ -8,10 +8,10 @@ export class GetCityResponseModel {
   name: string;
 
   @ApiProperty()
-  latitude: number;
+  latitude: number | null;
 
   @ApiProperty()
-  longitude: number;
+  longitude: number | null;
 
   @ApiProperty()
   createdAt: Date;

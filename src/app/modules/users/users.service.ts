@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/db/typeorm/entities/user.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager, In } from 'typeorm';
 import { PostUserRequestModel } from './models/post-user-request.model';
 import { PutUserRequestModel } from './models/put-user-request.model';
 import * as crypto from 'crypto';
 import { Role } from 'src/db/typeorm/entities/role.entity';
 import { ApiError } from 'src/app/@core/models/api-error.model';
 import { EmailService } from 'src/app/@core/services/email.service';
+import { DEFAULT_CITIES } from 'src/db/typeorm-seeding/models/default-cities.model';
+import { City } from 'src/db/typeorm/entities/city.entity';
+import { Technology } from 'src/db/typeorm/entities/technology.entity';
 
 @Injectable()
 export class UsersService {
@@ -39,55 +42,63 @@ export class UsersService {
   }
 
   async create(payload: PostUserRequestModel): Promise<User> {
-    const password = this.generatePaswsord();
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      const password = this.generatePaswsord();
 
-    const userExists = await this.dataSource.getRepository(User).findOneBy({
-      email: payload.email || '',
-    });
+      const userExists = await entityManager.getRepository(User).findOneBy({
+        email: payload.email || '',
+      });
 
-    if (userExists) {
-      throw new ApiError(400, 'Un utilizator cu acest email deja există.')
-    }
+      if (userExists) {
+        throw new ApiError(400, 'Un utilizator cu acest email deja există.');
+      }
 
-    const user = new User();
+      const user = new User();
 
-    user.firstName = payload.firstName;
-    user.lastName = payload.lastName;
-    user.email = payload.email;
-    user.password = crypto.createHash('sha256').update(password).digest('hex');
+      user.firstName = payload.firstName;
+      user.lastName = payload.lastName;
+      user.email = payload.email;
+      user.password = crypto
+        .createHash('sha256')
+        .update(password)
+        .digest('hex');
 
-    const role = await this.dataSource.getRepository(Role).findOneBy({
-      role: payload.role || '',
-    });
+      const role = await entityManager.getRepository(Role).findOneBy({
+        role: payload.role || '',
+      });
 
-    if (!role) {
-      throw new ApiError(400, 'Rolul nu a fost găsit.');
-    }
+      if (!role) {
+        throw new ApiError(400, 'Rolul nu a fost găsit.');
+      }
 
-    user.role = role;
+      user.role = role;
 
-    try {
-      let result = await this.dataSource
-        .getRepository(User)
-        .save(user)
-        .then((user: User) => this.extractRoleNameFromUser(user));
+      await this.addDefaultCities(entityManager, user);
+      await this.addDefaultTechnologies(entityManager, user);
 
       try {
-        await this.sendInitialEmail(result, password);
+        let result = await entityManager
+          .getRepository(User)
+          .save(user)
+          .then((user: User) => this.extractRoleNameFromUser(user));
+
+        try {
+          await this.sendInitialEmail(result, password);
+        } catch (error: any) {
+          await entityManager.getRepository(User);
+
+          throw new ApiError(500, 'Nu am putut trimite emailul de confirmare');
+        }
+
+        return result;
       } catch (error: any) {
-        await this.dataSource.getRepository(User);
-
-        throw new ApiError(500, 'Nu am putut trimite emailul de confirmare');
+        if (error instanceof ApiError) {
+          throw error;
+        } else {
+          throw new ApiError(500);
+        }
       }
-
-      return result;
-    } catch (error: any) {
-      if (error instanceof ApiError) {
-        throw error;
-      } else {
-        throw new ApiError(500);
-      }
-    }
+    });
   }
 
   async updateById(id: number, payload: PutUserRequestModel): Promise<User> {
@@ -136,6 +147,27 @@ export class UsersService {
   private extractRoleNameFromUser(user: User) {
     // @ts-ignore
     user.role = user?.role?.role || null;
+
+    return user;
+  }
+
+  private async addDefaultTechnologies(
+    entityManager: EntityManager,
+    user: User,
+  ) {
+    user.technologies =
+      (await entityManager.getRepository(Technology).findBy({
+        name: In(['JavaScript', 'React', 'Java']),
+      })) || [];
+
+    return user;
+  }
+
+  private async addDefaultCities(entityManager: EntityManager, user: User) {
+    user.cities =
+      (await entityManager.getRepository(City).findBy({
+        name: In([DEFAULT_CITIES.map((city) => city.name)]),
+      })) || [];
 
     return user;
   }

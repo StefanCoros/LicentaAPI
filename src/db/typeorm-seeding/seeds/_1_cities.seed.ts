@@ -4,7 +4,11 @@ import { City } from '../../typeorm/entities/city.entity';
 import { DEFAULT_CITIES } from '../models/default-cities.model';
 
 export class CitiesSeed implements Seeder {
-  private dataList: { name: string; longitude: number; latitude: number }[] = [];
+  private dataList: {
+    name: string;
+    longitude: number | null;
+    latitude: number | null;
+  }[] = [];
 
   constructor() {
     this.dataList = DEFAULT_CITIES;

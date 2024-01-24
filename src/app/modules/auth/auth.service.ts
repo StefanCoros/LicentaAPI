@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from 'src/db/typeorm/entities/user.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager, In } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { Request } from 'express';
@@ -15,6 +15,9 @@ import { PostForgotPasswordRequestModel } from './models/post-forgot-password-re
 import { EmailService } from '../../@core/services/email.service';
 import { PostResetPasswordRequestModel } from './models/post-reset-password-request.model';
 import { Role } from 'src/db/typeorm/entities/role.entity';
+import { Technology } from 'src/db/typeorm/entities/technology.entity';
+import { DEFAULT_CITIES } from 'src/db/typeorm-seeding/models/default-cities.model';
+import { City } from 'src/db/typeorm/entities/city.entity';
 
 @Injectable()
 export class AuthService {
@@ -95,35 +98,40 @@ export class AuthService {
   }
 
   async register(payload: PostRegisterRequestModel) {
-    let user = await this.dataSource.getRepository(User).findOneBy({
-      email: payload.email || '',
+    return this.dataSource.transaction(async (entityManager) => {
+      let user = await entityManager.getRepository(User).findOneBy({
+        email: payload.email || '',
+      });
+
+      if (user) {
+        throw new ForbiddenException('User already exists');
+      }
+
+      user = new User();
+
+      user.firstName = payload.firstName;
+      user.lastName = payload.lastName;
+      user.email = payload.email;
+      user.password = crypto
+        .createHash('sha256')
+        .update(payload.password)
+        .digest('hex');
+
+      const role = await entityManager.getRepository(Role).findOneBy({
+        role: RolesEnum.Standard || '',
+      });
+
+      if (!role) {
+        throw new Error('Standard role not found.');
+      }
+
+      user.role = role;
+
+      await this.addDefaultTechnologies(entityManager, user);
+      await this.addDefaultCities(entityManager, user);
+
+      return entityManager.getRepository(User).save(user);
     });
-
-    if (user) {
-      throw new ForbiddenException('User already exists');
-    }
-
-    user = new User();
-
-    user.firstName = payload.firstName;
-    user.lastName = payload.lastName;
-    user.email = payload.email;
-    user.password = crypto
-      .createHash('sha256')
-      .update(payload.password)
-      .digest('hex');
-
-    const role = await this.dataSource.getRepository(Role).findOneBy({
-      role: RolesEnum.Standard || '',
-    });
-
-    if (!role) {
-      throw new Error('Standard role not found.');
-    }
-
-    user.role = role;
-
-    return this.dataSource.getRepository(User).save(user);
   }
 
   async forgotPassword(
@@ -188,5 +196,26 @@ export class AuthService {
     }
 
     return new BadRequestException();
+  }
+
+  private async addDefaultTechnologies(
+    entityManager: EntityManager,
+    user: User,
+  ) {
+    user.technologies =
+      (await entityManager.getRepository(Technology).findBy({
+        name: In(['JavaScript', 'React', 'Java']),
+      })) || [];
+
+    return user;
+  }
+
+  private async addDefaultCities(entityManager: EntityManager, user: User) {
+    user.cities =
+      (await entityManager.getRepository(City).findBy({
+        name: In([DEFAULT_CITIES.map((city) => city.name)]),
+      })) || [];
+
+    return user;
   }
 }
