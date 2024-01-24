@@ -6,6 +6,7 @@ import { CoreModule } from './@core/core.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { TechnologiesModule } from './modules/technologies/technologies.module';
 import { UsersModule } from './modules/users/users.module';
@@ -46,6 +47,7 @@ import * as path from 'path';
     AuthModule,
     CitiesModule,
     JobsModule,
+    PermissionsModule,
     RolesModule,
     TechnologiesModule,
     UsersModule,

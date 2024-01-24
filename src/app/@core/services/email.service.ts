@@ -1,15 +1,11 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { PostForgotPasswordRequestModel } from 'src/app/modules/auth/models/post-forgot-password-request.model';
-import { ConfigService } from 'src/config/config.service';
 import { User } from 'src/db/typeorm/entities/user.entity';
 
 @Injectable()
 export class EmailService {
-  constructor(
-    private configService: ConfigService,
-    private mailerService: MailerService,
-  ) {}
+  constructor(private mailerService: MailerService) {}
 
   async sendRegistrationConfirmationEmail(user: User, password: string) {
     return this.mailerService
