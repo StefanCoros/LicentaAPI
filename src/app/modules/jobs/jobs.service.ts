@@ -7,6 +7,7 @@ import { Technology } from 'src/db/typeorm/entities/technology.entity';
 import { User } from 'src/db/typeorm/entities/user.entity';
 import { GetJobResponseModel } from './models/get-job-response.model';
 import { DiacriticsService } from 'src/app/@core/services/diacritics.service';
+import { City } from 'src/db/typeorm/entities/city.entity';
 
 @Injectable()
 export class JobsService {
@@ -26,6 +27,7 @@ export class JobsService {
         'technologies',
         'technologies.jobs',
         'technologies.jobs.technologyStack',
+        'technologies.jobs.cities',
         'cities',
       ],
     });
@@ -39,6 +41,7 @@ export class JobsService {
     return jobs
       .filter((job) => this.filterByCurrentUserCities(job, user))
       .map((job) => this.extractTechnologyNameFromJob(job))
+      .map((job) => this.extractCityCoordinatesFromJob(job))
       .map((job) => {
         job.address = this.diacriticsService.getTextWithoutDiacritics(
           job?.address || '',
@@ -56,10 +59,11 @@ export class JobsService {
         where: {
           id: id || 0,
         },
-        relations: ['technologyStack'],
+        relations: ['technologyStack', 'cities'],
       })
       .then((job: Job) => {
         job = this.extractTechnologyNameFromJob(job);
+        job = this.extractCityCoordinatesFromJob(job);
 
         job.address = this.diacriticsService.getTextWithoutDiacritics(
           job?.address || '',
@@ -121,15 +125,10 @@ export class JobsService {
 
   private filterByCurrentUserCities(job: Job, user: User | null) {
     if (user) {
-      for (const city of user.cities) {
-        const normalizedJobAddress = this.diacriticsService
-          .getTextWithoutDiacritics(job.address)
-          .toLowerCase();
-        const normalizedCity = this.diacriticsService
-          .getTextWithoutDiacritics(city.name)
-          .toLowerCase();
+      const jobCityIds = job.cities.map((city) => city.id);
 
-        if (normalizedJobAddress.includes(normalizedCity)) {
+      for (const city of user.cities) {
+        if (jobCityIds.includes(city.id)) {
           return true;
         }
       }
@@ -145,6 +144,31 @@ export class JobsService {
     job.technologyStack = job.technologyStack.map(
       (technology: Technology) => technology.name,
     );
+
+    return job;
+  }
+
+  private extractCityCoordinatesFromJob(job: Job) {
+    // @ts-ignore
+    job.coordinates = job.cities
+      .filter((city: City) => city.name !== 'Remote')
+      .reduce(
+        (acc: any, value: City) => {
+          acc = {
+            lat: value.latitude,
+            lng: value.longitude,
+          };
+
+          return acc;
+        },
+        {
+          lat: null,
+          lng: null,
+        },
+      );
+
+    // @ts-ignore
+    delete job.cities;
 
     return job;
   }

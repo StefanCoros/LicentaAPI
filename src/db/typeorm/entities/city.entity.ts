@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Job } from './job.entity';
 
 @Entity({ name: 'cities' })
 export class City {
@@ -16,10 +17,10 @@ export class City {
   @Column({ unique: true })
   name: string;
 
-  @Column('float', {nullable: true})
+  @Column('float', { nullable: true })
   latitude: number | null;
 
-  @Column('float', {nullable: true})
+  @Column('float', { nullable: true })
   longitude: number | null;
 
   @CreateDateColumn()
@@ -30,4 +31,7 @@ export class City {
 
   @ManyToMany(() => User, (user) => user.cities)
   users: User[];
+
+  @ManyToMany(() => Job, (job) => job.cities)
+  jobs: Job[];
 }
