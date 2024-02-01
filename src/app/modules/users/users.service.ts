@@ -10,6 +10,7 @@ import { EmailService } from 'src/app/@core/services/email.service';
 import { DEFAULT_CITIES } from 'src/db/typeorm-seeding/models/default-cities.model';
 import { City } from 'src/db/typeorm/entities/city.entity';
 import { Technology } from 'src/db/typeorm/entities/technology.entity';
+import { RolesEnum } from 'src/app/@core/models/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -102,23 +103,40 @@ export class UsersService {
   }
 
   async updateById(id: number, payload: PutUserRequestModel): Promise<User> {
-    const user = await this.dataSource.getRepository(User).findOneByOrFail({
-      id: id || 0,
+    const user = await this.dataSource.getRepository(User).findOneOrFail({
+      where: {
+        id: id || 0,
+      },
+      relations: ['role'],
     });
 
     user.firstName = payload.firstName;
     user.lastName = payload.lastName;
     user.email = payload.email;
 
-    const role = await this.dataSource.getRepository(Role).findOneBy({
-      role: payload.role || '',
-    });
+    if (user.role?.role === RolesEnum.Admin) {
+      if (payload.role !== RolesEnum.Admin) {
+        const adminCounts = (await this.getAdminCounts()) - 1;
 
-    if (!role) {
-      throw new Error('Provided role not found.');
+        // check if there are other admins
+        if (adminCounts === 0) {
+          throw new ApiError(
+            403,
+            'Nu se poate actualiza utilizatorul selectat.',
+          );
+        }
+      }
+    } else {
+      const role = await this.dataSource.getRepository(Role).findOneBy({
+        role: payload.role || '',
+      });
+
+      if (!role) {
+        throw new ApiError(403, 'Rolul nu a fost găsit.');
+      }
+
+      user.role = role;
     }
-
-    user.role = role;
 
     return this.dataSource
       .getRepository(User)
@@ -127,11 +145,21 @@ export class UsersService {
   }
 
   async deleteById(id: number): Promise<any> {
-    const user: User = await this.dataSource
-      .getRepository(User)
-      .findOneByOrFail({
+    const user: User = await this.dataSource.getRepository(User).findOneOrFail({
+      where: {
         id: id || 0,
-      });
+      },
+      relations: ['role'],
+    });
+
+    if (user.role?.role === RolesEnum.Admin) {
+      const adminCounts = (await this.getAdminCounts()) - 1;
+
+      // check if there are other admins
+      if (adminCounts === 0) {
+        throw new ApiError(403, 'Nu se poate sterge utilizatorul selectat.');
+      }
+    }
 
     return !!(await this.dataSource.getRepository(User).remove(user));
   }
@@ -170,5 +198,15 @@ export class UsersService {
       })) || [];
 
     return user;
+  }
+
+  private async getAdminCounts() {
+    return (
+      await this.dataSource.getRepository(User).findBy({
+        role: {
+          role: RolesEnum.Admin,
+        },
+      })
+    ).length;
   }
 }

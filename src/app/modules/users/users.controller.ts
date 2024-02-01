@@ -80,22 +80,22 @@ export class UsersController {
     @Res() response: Response,
     @Body() payload: PostUserRequestModel,
   ): Promise<Response<GetUserResponseModel | boolean>> {
-    let result: any = false;
-
     try {
-      result = await this.usersService
+      const result = await this.usersService
         .create(payload)
         .then((user: User) => this.extractFields(user));
+
+      return response.send(result);
     } catch (error: any) {
       if (error instanceof ApiError) {
         response.status(error.statusCode);
-        result = error.message;
+        response.write(error.message);
       } else {
-        response.status(500);
+        return response.send(false);
       }
     }
 
-    return response.send(result);
+    return response.send();
   }
 
   @Put(':id')
@@ -116,11 +116,20 @@ export class UsersController {
     if (!numberId) {
       response.status(400);
     } else {
-      const result = await this.usersService
-        .updateById(numberId, payload)
-        .then((user: User) => this.extractFields(user));
+      try {
+        const result = await this.usersService
+          .updateById(numberId, payload)
+          .then((user: User) => this.extractFields(user));
 
-      return response.send(result);
+        return response.send(result);
+      } catch (error: any) {
+        if (error instanceof ApiError) {
+          response.status(error.statusCode);
+          response.write(error.message);
+        } else {
+          return response.send(false);
+        }
+      }
     }
 
     return response.send();
@@ -140,9 +149,18 @@ export class UsersController {
     if (!numberId) {
       response.status(400);
     } else {
-      const result = await this.usersService.deleteById(numberId);
+      try {
+        const result = await this.usersService.deleteById(numberId);
 
-      return response.send(result);
+        return response.send(result);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          response.status(error.statusCode);
+          response.write(error.message);
+        } else {
+          return response.send(false);
+        }
+      }
     }
 
     return response.send();

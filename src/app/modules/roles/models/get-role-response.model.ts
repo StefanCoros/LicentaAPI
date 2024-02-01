@@ -8,6 +8,9 @@ export class GetRoleResponseModel {
   role: string;
 
   @ApiProperty()
+  permissions: string[];
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
