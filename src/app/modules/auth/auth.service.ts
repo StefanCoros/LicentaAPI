@@ -118,11 +118,11 @@ export class AuthService {
         .digest('hex');
 
       const role = await entityManager.getRepository(Role).findOneBy({
-        role: RolesEnum.Standard || '',
+        role: RolesEnum.Premium || '',
       });
 
       if (!role) {
-        throw new Error('Standard role not found.');
+        throw new Error('Premium role not found.');
       }
 
       user.role = role;
