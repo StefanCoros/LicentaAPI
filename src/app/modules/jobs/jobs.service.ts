@@ -32,11 +32,16 @@ export class JobsService {
       ],
     });
 
-    const jobs = (user?.technologies || []).reduce(
+    let jobs = (user?.technologies || []).reduce(
       (jobArray: Job[], technology: Technology) =>
         jobArray.concat(technology.jobs),
       [],
     );
+
+    // remove duplicates
+    jobs = jobs.filter(function (item, pos, self) {
+      return self.findIndex((_item) => _item.link === item.link) === pos;
+    });
 
     return jobs
       .filter((job) => this.filterByCurrentUserCities(job, user))
