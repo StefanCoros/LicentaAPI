@@ -50,6 +50,10 @@ export class RolesService {
   }
 
   async create(payload: PostRoleRequestModel): Promise<GetRoleResponseModel> {
+    if (!Array.isArray(payload?.permissions)) {
+      throw new ApiError(400, 'Lista de permisiuni nu a fost trimisa.');
+    }
+
     const role = new Role();
 
     role.role = payload.role;
@@ -83,6 +87,10 @@ export class RolesService {
     id: number,
     payload: PutRoleRequestModel,
   ): Promise<GetRoleResponseModel> {
+    if (!Array.isArray(payload?.permissions)) {
+      throw new ApiError(400, 'Lista de permisiuni nu a fost trimisa.');
+    }
+
     const role = await this.dataSource.getRepository(Role).findOneByOrFail({
       id: id || 0,
     });

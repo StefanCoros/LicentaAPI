@@ -68,8 +68,24 @@ export class RolesController {
   @ApiResponse({
     type: GetRoleResponseModel,
   })
-  create(@Body() payload: PostRoleRequestModel): Promise<GetRoleResponseModel> {
-    return this.rolesService.create(payload);
+  async create(
+    @Res() response: Response,
+    @Body() payload: PostRoleRequestModel,
+  ): Promise<Response<GetRoleResponseModel | string>> {
+    try {
+      const result = await this.rolesService.create(payload);
+
+      return response.send(result);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        response.status(error.statusCode);
+        response.write(error.message);
+      } else {
+        return response.send(false);
+      }
+    }
+
+    return response.send();
   }
 
   @Put(':id')
@@ -90,9 +106,18 @@ export class RolesController {
     if (!numberId) {
       response.status(400);
     } else {
-      const result = await this.rolesService.updateById(numberId, payload);
+      try {
+        const result = await this.rolesService.updateById(numberId, payload);
 
-      return response.send(result);
+        return response.send(result);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          response.status(error.statusCode);
+          response.write(error.message);
+        } else {
+          return response.send(false);
+        }
+      }
     }
 
     return response.send();
