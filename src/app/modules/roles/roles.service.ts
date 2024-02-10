@@ -133,7 +133,7 @@ export class RolesService {
     if (role?.users?.length > 0) {
       throw new ApiError(
         403,
-        'Rolul nu poate fi şters. Unii utilizatori au acest rol asignat.',
+        'Rolul nu poate fi &#351;ters. Unii utilizatori au acest rol asignat.',
       );
     }
 

@@ -51,7 +51,7 @@ export class UsersService {
       });
 
       if (userExists) {
-        throw new ApiError(400, 'Un utilizator cu acest email deja există.');
+        throw new ApiError(400, 'Un utilizator cu acest email deja exist&#259;.');
       }
 
       const user = new User();
@@ -69,7 +69,7 @@ export class UsersService {
       });
 
       if (!role) {
-        throw new ApiError(400, 'Rolul nu a fost găsit.');
+        throw new ApiError(400, 'Rolul nu a fost g&#259;sit.');
       }
 
       user.role = role;
@@ -132,7 +132,7 @@ export class UsersService {
       });
 
       if (!role) {
-        throw new ApiError(403, 'Rolul nu a fost găsit.');
+        throw new ApiError(403, 'Rolul nu a fost g&#259;sit.');
       }
 
       user.role = role;
