@@ -1,4 +1,4 @@
-import { Connection, EntityManager } from 'typeorm';
+import { Connection, DeepPartial, EntityManager } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { User } from '../../typeorm/entities/user.entity';
 import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
@@ -80,7 +80,7 @@ export class UsersSeed implements Seeder {
             const { role, ...userData } = data;
 
             const newUser = await entityManager.save(
-              entityManager.create<User>(User, userData),
+              entityManager.create<User, DeepPartial<User>>(User, userData),
             );
             await this.addDefaultTechnologies(entityManager, newUser);
             await this.addDefaultCities(entityManager, newUser);

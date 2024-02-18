@@ -1,4 +1,4 @@
-import { Connection, EntityManager } from 'typeorm';
+import { Connection, DeepPartial, EntityManager } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Role } from '../../typeorm/entities/role.entity';
 import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
@@ -29,7 +29,7 @@ export class RolesSeed implements Seeder {
           });
 
           if (!roleExists) {
-            await entityManager.save([entityManager.create<Role>(Role, data)]);
+            await entityManager.save([entityManager.create<Role, DeepPartial<Role>>(Role, data)]);
           }
         }
       }

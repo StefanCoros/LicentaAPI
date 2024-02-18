@@ -2,7 +2,7 @@ import { RolesEnum } from '../../../app/@core/models/enums/roles.enum';
 import { PermissionsEnum } from '../../../app/modules/permissions/models/enums/permissions.enum';
 import { Permission } from '../../typeorm/entities/permission.entity';
 import { Role } from '../../typeorm/entities/role.entity';
-import { Connection, EntityManager } from 'typeorm';
+import { Connection, DeepPartial, EntityManager } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 
 export class PermissionssSeed implements Seeder {
@@ -59,7 +59,7 @@ export class PermissionssSeed implements Seeder {
 
               if (!permissionObject) {
                 permissionObject = await entityManager.save(
-                  entityManager.create<Permission>(Permission, { permission }),
+                  entityManager.create<Permission, DeepPartial<Permission>>(Permission, { permission }),
                 );
               }
 
